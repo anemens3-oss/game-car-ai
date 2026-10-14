@@ -3,225 +3,738 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>CYBER KART // CRT TELEVISION EDITION</title>
+  <title>CYBER-KART 2099 // MEGA INTERACTIVE OVERDRIVE</title>
   <style>
     :root {
       --neon-cyan: #00f3ff;
       --neon-pink: #ff007f;
       --neon-yellow: #ffe600;
       --neon-green: #00ff66;
-      --crt-bg: #070510;
-      --panel-bg: rgba(12, 8, 26, 0.9);
+      --panel-bg: rgba(11, 7, 24, 0.94);
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: 'Courier New', Consolas, monospace; }
-    body, html { width: 100%; height: 100%; overflow: hidden; background: #030206; color: #fff; }
 
-    /* РАМКА РЕТРО-ТЕЛЕВИЗОРА (CRT BEZEL + ЭФФЕКТ КИНЕСКОПА) */
-    #crt-monitor {
-      position: relative; width: 100vw; height: 100vh; overflow: hidden;
-      border: 14px solid #181424;
-      box-shadow: inset 0 0 60px rgba(0,0,0,0.9), 0 0 30px rgba(0, 243, 255, 0.2);
-      border-radius: 18px;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      font-family: 'Courier New', Consolas, monospace;
     }
-    /* Сканлайны и виньетка кинескопа */
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #040208;
+      color: #fff;
+    }
+
+    #crt-monitor {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      border: 10px solid #191426;
+      box-shadow: inset 0 0 45px rgba(0,0,0,0.85), 0 0 25px rgba(0, 243, 255, 0.18);
+    }
+
+    /* ЭЛТ-Фильтр по умолчанию ВЫКЛЮЧЕН */
     #crt-overlay {
-      position: absolute; inset: 0; z-index: 20; pointer-events: none;
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      pointer-events: none !important;
+      display: none;
       background:
-        linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.32) 50%),
-        radial-gradient(circle at center, transparent 62%, rgba(0, 0, 0, 0.75) 100%);
+        linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.30) 50%),
+        radial-gradient(circle at center, transparent 64%, rgba(0, 0, 0, 0.72) 100%);
       background-size: 100% 4px, 100% 100%;
     }
+
     .crt-badge {
-      position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
-      z-index: 25; font-size: 10px; letter-spacing: 3px; color: #6e6488;
-      text-transform: uppercase; pointer-events: none;
+      position: absolute;
+      bottom: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 6;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: #796e99;
+      pointer-events: none;
     }
 
-    #game-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+    #game-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
 
-    /* ИГРОВОЙ HUD В СТИЛЕ КИБЕРПАНК + РЕТРО-ТВ */
+    /* ИГРОВОЙ ИНТЕРФЕЙС (HUD) */
     #hud {
-      position: absolute; inset: 0; z-index: 5; pointer-events: none;
-      display: none; padding: 20px 28px;
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      pointer-events: none;
+      display: none;
+      padding: 16px 24px;
     }
+
     .hud-top-left {
-      position: absolute; top: 20px; left: 28px; display: flex; align-items: center; gap: 14px;
+      position: absolute;
+      top: 16px;
+      left: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
     }
-    .tv-channel-box {
-      background: rgba(8, 6, 18, 0.85); border: 2px solid var(--neon-green);
-      padding: 6px 12px; border-radius: 6px; color: var(--neon-green);
-      text-shadow: 0 0 8px var(--neon-green); font-weight: 900; font-size: 14px;
+
+    .pilot-hud-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(8, 6, 20, 0.88);
+      border: 2px solid var(--neon-cyan);
+      border-radius: 8px;
+      padding: 5px 12px;
+      box-shadow: 0 0 12px rgba(0, 243, 255, 0.35);
     }
+
+    .pilot-hud-card img {
+      width: 38px;
+      height: 38px;
+      border-radius: 6px;
+      border: 1px solid var(--neon-pink);
+    }
+
+    #hud-pilot-name {
+      font-weight: 900;
+      font-size: 13px;
+      color: var(--neon-yellow);
+    }
+
+    #hud-channel {
+      font-size: 10px;
+      color: var(--neon-green);
+    }
+
     .pos-badge {
-      background: linear-gradient(135deg, var(--neon-pink), #7a00ff);
-      padding: 6px 16px; border-radius: 6px; font-weight: 900;
-      font-size: 28px; border: 2px solid var(--neon-cyan);
-      box-shadow: 0 0 16px rgba(255, 0, 127, 0.6);
+      background: linear-gradient(135deg, var(--neon-pink), #7000ff);
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-weight: 900;
+      font-size: 24px;
+      border: 2px solid var(--neon-cyan);
+      box-shadow: 0 0 15px rgba(255, 0, 127, 0.5);
     }
+
     .item-slot {
-      width: 64px; height: 64px; border-radius: 8px;
-      background: rgba(10, 12, 28, 0.9); border: 2px solid var(--neon-cyan);
-      box-shadow: 0 0 14px rgba(0, 243, 255, 0.4);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      font-weight: 900; font-size: 10px; color: var(--neon-cyan); text-align: center;
+      width: 58px;
+      height: 58px;
+      border-radius: 8px;
+      background: rgba(10, 12, 28, 0.9);
+      border: 2px solid var(--neon-cyan);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 9px;
+      color: var(--neon-cyan);
     }
-    .item-slot .item-icon { font-size: 24px; margin-bottom: 2px; }
+
+    .item-slot .item-icon {
+      font-size: 22px;
+    }
+
+    .coin-counter {
+      background: rgba(12, 10, 26, 0.88);
+      border: 2px solid var(--neon-yellow);
+      padding: 7px 11px;
+      border-radius: 8px;
+      font-weight: 900;
+      font-size: 16px;
+      color: var(--neon-yellow);
+    }
+
+    .btn-hud-action {
+      pointer-events: auto !important;
+      cursor: pointer;
+      background: rgba(0, 243, 255, 0.18);
+      border: 2px solid var(--neon-cyan);
+      color: #fff;
+      font-weight: 900;
+      font-size: 11px;
+      padding: 7px 10px;
+      border-radius: 8px;
+      transition: 0.15s;
+    }
+    .btn-hud-action:hover {
+      background: var(--neon-pink);
+      border-color: var(--neon-yellow);
+    }
+
+    /* ПАНЕЛЬ ЖИВОГО КОНТРАКТА (МИССИИ В РЕАЛЬНОМ ВРЕМЕНИ) */
+    .hud-mission-tracker {
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(10, 8, 26, 0.9);
+      border: 2px solid var(--neon-green);
+      border-radius: 10px;
+      padding: 6px 16px;
+      text-align: center;
+      box-shadow: 0 0 18px rgba(0, 255, 102, 0.3);
+      min-width: 270px;
+    }
+    .mission-title {
+      font-size: 10px;
+      color: var(--neon-yellow);
+      letter-spacing: 1.5px;
+      font-weight: 900;
+    }
+    .mission-desc {
+      font-size: 13px;
+      color: #fff;
+      font-weight: 900;
+      margin: 2px 0;
+    }
+    .mission-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .mission-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-green));
+      transition: width 0.2s;
+    }
 
     .hud-top-right {
-      position: absolute; top: 20px; right: 28px; text-align: right;
-      font-weight: 900; text-shadow: 0 0 10px var(--neon-cyan);
+      position: absolute;
+      top: 16px;
+      right: 24px;
+      text-align: right;
+      font-weight: 900;
     }
-    .hud-lap { font-size: 20px; color: var(--neon-yellow); letter-spacing: 2px; }
-    .hud-timer { font-size: 40px; color: #ffffff; letter-spacing: 2px; }
+
+    .hud-lap {
+      font-size: 19px;
+      color: var(--neon-yellow);
+      letter-spacing: 2px;
+    }
+
+    .hud-timer {
+      font-size: 36px;
+      color: #fff;
+      text-shadow: 0 0 12px var(--neon-cyan);
+    }
+
+    .hud-combo {
+      font-size: 15px;
+      color: var(--neon-green);
+      text-shadow: 0 0 8px var(--neon-green);
+      margin-top: 4px;
+    }
 
     .hud-bottom-left {
-      position: absolute; bottom: 20px; left: 28px; width: 200px; height: 150px;
-      background: rgba(8, 6, 18, 0.7); border: 1px solid rgba(0, 243, 255, 0.4);
-      border-radius: 8px; padding: 4px;
+      position: absolute;
+      bottom: 20px;
+      left: 24px;
+      width: 210px;
+      height: 160px;
+      background: rgba(8, 6, 18, 0.72);
+      border: 1px solid rgba(0, 243, 255, 0.45);
+      border-radius: 8px;
+      padding: 4px;
     }
-    #minimap-canvas { width: 100%; height: 100%; }
+
+    #minimap-canvas {
+      width: 100%;
+      height: 100%;
+    }
 
     .hud-bottom-right {
-      position: absolute; bottom: 20px; right: 28px; width: 290px; height: 100px;
-      display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-end;
+      position: absolute;
+      bottom: 20px;
+      right: 24px;
+      width: 290px;
+      height: 100px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: flex-end;
     }
-    #speedo-canvas { position: absolute; bottom: 0; right: 0; width: 290px; height: 95px; }
-    .speed-readout { position: relative; z-index: 2; text-align: right; padding-right: 6px; font-weight: 900; }
-    .speed-unit { font-size: 12px; color: var(--neon-pink); letter-spacing: 2px; }
-    .speed-val { font-size: 44px; line-height: 0.9; color: var(--neon-cyan); text-shadow: 0 0 12px var(--neon-cyan); }
+
+    #speedo-canvas {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 290px;
+      height: 95px;
+    }
+
+    .speed-readout {
+      position: relative;
+      z-index: 2;
+      text-align: right;
+      padding-right: 6px;
+      font-weight: 900;
+    }
+
+    .speed-unit {
+      font-size: 11px;
+      color: var(--neon-pink);
+      letter-spacing: 1.5px;
+    }
+
+    .speed-val {
+      font-size: 44px;
+      line-height: 0.9;
+      color: var(--neon-cyan);
+      text-shadow: 0 0 12px var(--neon-cyan);
+    }
 
     #center-banner {
-      position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
-      font-size: 74px; font-weight: 900; color: var(--neon-yellow);
-      text-shadow: 4px 4px 0 var(--neon-pink), 0 0 30px var(--neon-cyan);
-      pointer-events: none; z-index: 8; text-align: center;
+      position: absolute;
+      top: 38%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 52px;
+      font-weight: 900;
+      color: var(--neon-yellow);
+      text-shadow: 3px 3px 0 var(--neon-pink), 0 0 25px var(--neon-cyan);
+      pointer-events: none;
+      z-index: 12;
+      text-align: center;
     }
 
-    /* ГЛАВНОЕ МЕНЮ В СТИЛЕ КИБЕРПАНК-ТЕРМИНАЛА И РЕТРО-ТВ */
+    /* ГЛАВНОЕ МЕНЮ */
     .overlay-screen {
-      position: absolute; inset: 0; z-index: 15;
-      background: radial-gradient(circle at 50% 30%, rgba(35, 8, 64, 0.78), rgba(5, 3, 12, 0.94));
+      position: absolute;
+      inset: 0;
+      z-index: 50;
+      pointer-events: auto !important;
+      background: radial-gradient(circle at 50% 25%, rgba(36, 10, 68, 0.78), rgba(5, 3, 12, 0.95));
       backdrop-filter: blur(6px);
-      display: flex; align-items: center; justify-content: center; padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
     }
+
     .cyber-menu {
-      width: min(980px, 96vw); max-height: 92vh; overflow-y: auto;
+      position: relative;
+      z-index: 55;
+      pointer-events: auto !important;
+      width: min(1120px, 96vw);
+      max-height: 95vh;
+      overflow-y: auto;
       background: var(--panel-bg);
       border: 2px solid var(--neon-cyan);
-      box-shadow: 0 0 35px rgba(0, 243, 255, 0.25), inset 0 0 25px rgba(255, 0, 127, 0.15);
-      border-radius: 12px; padding: 24px 28px;
-    }
-    .menu-header {
-      display: flex; justify-content: space-between; align-items: flex-end;
-      border-bottom: 2px dashed rgba(0, 243, 255, 0.4); padding-bottom: 12px; margin-bottom: 18px;
-      flex-wrap: wrap; gap: 10px;
-    }
-    .cyber-title {
-      font-size: 34px; font-weight: 900; color: var(--neon-cyan);
-      text-shadow: 3px 3px 0 var(--neon-pink), 0 0 18px var(--neon-cyan);
-      letter-spacing: 2px; text-transform: uppercase;
-    }
-    .tv-status {
-      font-size: 13px; color: var(--neon-green); background: rgba(0, 255, 102, 0.12);
-      border: 1px solid var(--neon-green); padding: 4px 10px; border-radius: 4px;
+      box-shadow: 0 0 35px rgba(0, 243, 255, 0.25), inset 0 0 25px rgba(255, 0, 127, 0.12);
+      border-radius: 12px;
+      padding: 16px 20px;
     }
 
-    .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-    @media (max-width: 760px) { .grid-2col { grid-template-columns: 1fr; } }
+    .menu-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px dashed rgba(0, 243, 255, 0.35);
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .cyber-title {
+      font-size: 25px;
+      font-weight: 900;
+      color: var(--neon-cyan);
+      text-shadow: 3px 3px 0 var(--neon-pink), 0 0 15px var(--neon-cyan);
+      letter-spacing: 2px;
+    }
+
+    .cyber-subtitle {
+      font-size: 11px;
+      color: #9ab2d4;
+      margin-top: 3px;
+    }
+
+    .header-profile-summary {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(0, 243, 255, 0.08);
+      border: 1px solid var(--neon-cyan);
+      padding: 6px 12px;
+      border-radius: 8px;
+    }
+
+    .header-profile-summary img {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      border: 2px solid var(--neon-yellow);
+    }
+
+    .hp-name {
+      font-size: 15px;
+      font-weight: 900;
+      color: var(--neon-yellow);
+    }
+
+    .hp-stats {
+      display: flex;
+      gap: 10px;
+      font-size: 11px;
+      color: #d8ebff;
+      margin-top: 3px;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      flex: 1;
+      min-width: 160px;
+      padding: 10px 12px;
+      background: rgba(0, 0, 0, 0.65);
+      border: 1px solid rgba(0, 243, 255, 0.35);
+      color: #a8c4e0;
+      font-weight: 900;
+      font-size: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      pointer-events: auto;
+      transition: 0.15s;
+    }
+
+    .tab-btn:hover { border-color: var(--neon-pink); color: #fff; }
+    .tab-btn.active {
+      background: linear-gradient(90deg, rgba(0, 243, 255, 0.25), rgba(255, 0, 127, 0.25));
+      border: 2px solid var(--neon-cyan);
+      color: #fff;
+      box-shadow: 0 0 14px rgba(0, 243, 255, 0.4);
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
 
     .cyber-box {
-      background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 243, 255, 0.28);
-      border-radius: 8px; padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(0, 243, 255, 0.28);
+      border-radius: 8px;
+      padding: 10px 12px;
     }
+
     .cyber-box h3 {
-      font-size: 13px; color: var(--neon-yellow); text-transform: uppercase;
-      margin-bottom: 10px; letter-spacing: 1.5px;
+      font-size: 12px;
+      color: var(--neon-yellow);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
     }
-    .btn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; }
+
+    .btn-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .btn-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
     .btn-grid-6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
-    @media (max-width: 650px) { .btn-grid-6 { grid-template-columns: repeat(3, 1fr); } }
+    .btn-grid-12 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+
+    @media (max-width: 820px) {
+      .btn-grid-2, .btn-grid-4 { grid-template-columns: 1fr 1fr; }
+      .btn-grid-6, .btn-grid-12 { grid-template-columns: repeat(3, 1fr); }
+    }
 
     .opt-btn {
-      background: rgba(0, 0, 0, 0.55); border: 1px solid rgba(0, 243, 255, 0.3);
-      color: #d8e6ff; padding: 9px 8px; border-radius: 6px; cursor: pointer;
-      font-weight: 700; font-size: 12px; text-align: center; transition: 0.15s;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(0, 243, 255, 0.35);
+      color: #d8e6ff;
+      padding: 8px 6px;
+      border-radius: 6px;
+      cursor: pointer;
+      pointer-events: auto;
+      font-weight: 700;
+      font-size: 11px;
+      text-align: center;
+      transition: 0.15s;
     }
+
+    .opt-btn * { pointer-events: none; }
     .opt-btn:hover { border-color: var(--neon-pink); color: #fff; }
     .opt-btn.active {
-      background: rgba(0, 243, 255, 0.22); border: 2px solid var(--neon-cyan);
-      color: #fff; box-shadow: 0 0 12px rgba(0, 243, 255, 0.45);
+      background: rgba(0, 243, 255, 0.25);
+      border: 2px solid var(--neon-cyan);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(0, 243, 255, 0.45);
     }
-    .opt-btn small { display: block; font-size: 10px; color: var(--neon-yellow); margin-top: 3px; }
+
+    .opt-btn small {
+      display: block;
+      font-size: 9px;
+      color: var(--neon-yellow);
+      margin-top: 3px;
+    }
+
+    /* ТЮНИНГ-АТЕЛЬЕ И МАСТЕРСКАЯ В ГАРАЖЕ */
+    .tuning-panel {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    @media (max-width: 780px) {
+      .tuning-panel { grid-template-columns: 1fr; }
+    }
+    .upgrade-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: rgba(0,0,0,0.45);
+      padding: 6px 10px;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      border: 1px solid rgba(0, 243, 255, 0.2);
+    }
+    .upgrade-dots {
+      display: flex;
+      gap: 4px;
+    }
+    .u-dot {
+      width: 14px;
+      height: 8px;
+      border-radius: 2px;
+      background: rgba(255,255,255,0.15);
+    }
+    .u-dot.filled {
+      background: var(--neon-green);
+      box-shadow: 0 0 6px var(--neon-green);
+    }
+    .neon-swatch-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+      flex-wrap: wrap;
+    }
+    .neon-swatch {
+      width: 32px;
+      height: 26px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 2px solid rgba(255,255,255,0.3);
+      pointer-events: auto;
+    }
+    .neon-swatch.active {
+      border: 2px solid #fff;
+      transform: scale(1.12);
+    }
+
+    .garage-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 8px;
+      max-height: 270px;
+      overflow-y: auto;
+      padding-right: 6px;
+      margin-bottom: 10px;
+    }
+
+    .car-card {
+      background: rgba(10, 12, 26, 0.88);
+      border: 1px solid rgba(0, 243, 255, 0.28);
+      border-radius: 8px;
+      padding: 9px;
+      cursor: pointer;
+      pointer-events: auto;
+      transition: 0.15s;
+    }
+    .car-card * { pointer-events: none; }
+    .car-card:hover { border-color: var(--neon-pink); transform: translateY(-2px); }
+    .car-card.selected {
+      border: 2px solid var(--neon-green);
+      box-shadow: 0 0 14px rgba(0, 255, 102, 0.35);
+      background: rgba(0, 255, 102, 0.08);
+    }
+    .car-card.locked { opacity: 0.85; border-color: rgba(255, 230, 0, 0.35); }
+    .car-tier-badge { font-size: 9px; font-weight: 900; padding: 2px 5px; border-radius: 4px; display: inline-block; margin-bottom: 3px; }
+    .car-name { font-size: 12px; font-weight: 900; color: #fff; margin-bottom: 4px; }
+    .stat-row { display: flex; align-items: center; justify-content: space-between; font-size: 9px; color: #9ab; margin-bottom: 2px; }
+    .stat-bar { width: 60%; height: 5px; background: rgba(255,255,255,0.12); border-radius: 3px; overflow: hidden; }
+    .stat-fill { height: 100%; background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink)); }
+    .car-action-label { margin-top: 5px; padding: 4px; border-radius: 4px; text-align: center; font-weight: 900; font-size: 10px; }
+
+    /* ПРОФИЛЬ И КОЛЕСО ФОРТУНЫ */
+    .profile-layout {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+    @media (max-width: 780px) {
+      .profile-layout { grid-template-columns: 1fr; }
+    }
+    .field-label { display: block; font-size: 11px; color: #a8c4e0; margin-bottom: 5px; }
+    #pilot-name-input {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.75);
+      border: 2px solid var(--neon-cyan);
+      color: var(--neon-yellow);
+      padding: 7px 10px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 900;
+      outline: none;
+      user-select: text !important;
+      pointer-events: auto;
+    }
+    .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .avatar-item {
+      background: rgba(0,0,0,0.55);
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      padding: 6px;
+      text-align: center;
+      cursor: pointer;
+      pointer-events: auto;
+    }
+    .avatar-item * { pointer-events: none; }
+    .avatar-item img { width: 48px; height: 48px; border-radius: 6px; margin-bottom: 3px; }
+    .avatar-item span { display: block; font-size: 9px; color: #cde; font-weight: 700; }
+    .avatar-item.active { border-color: var(--neon-cyan); background: rgba(0, 243, 255, 0.2); }
+
+    .stats-table { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    .stat-tile { background: rgba(0,0,0,0.45); border: 1px solid rgba(0, 243, 255, 0.2); padding: 8px; border-radius: 6px; }
+    .stat-tile small { display: block; font-size: 9px; color: #89a; }
+    .stat-tile b { font-size: 14px; color: var(--neon-cyan); }
 
     .menu-footer {
-      display: flex; justify-content: space-between; align-items: center;
-      flex-wrap: wrap; gap: 12px; padding-top: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-top: 10px;
       border-top: 1px solid rgba(255, 255, 255, 0.12);
     }
+
     .btn-launch {
       background: linear-gradient(90deg, var(--neon-pink), #ff5500);
-      color: #fff; border: 2px solid var(--neon-yellow);
-      padding: 13px 32px; border-radius: 8px; font-size: 18px; font-weight: 900;
-      letter-spacing: 1.5px; cursor: pointer; text-transform: uppercase;
-      box-shadow: 0 0 22px rgba(255, 0, 127, 0.6); transition: 0.15s;
+      color: #fff;
+      border: 2px solid var(--neon-yellow);
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+      pointer-events: auto;
+      box-shadow: 0 0 20px rgba(255, 0, 127, 0.6);
     }
-    .btn-launch:hover { transform: scale(1.03); box-shadow: 0 0 32px var(--neon-cyan); }
-    .btn-util {
-      background: rgba(0, 243, 255, 0.1); color: var(--neon-cyan);
-      border: 1px solid var(--neon-cyan); padding: 9px 14px; border-radius: 6px;
-      font-size: 12px; font-weight: 700; cursor: pointer;
-    }
-    .btn-util:hover { background: rgba(0, 243, 255, 0.25); }
 
-    /* Сенсорное управление */
+    .btn-util {
+      background: rgba(0, 243, 255, 0.12);
+      color: var(--neon-cyan);
+      border: 1px solid var(--neon-cyan);
+      padding: 7px 11px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      pointer-events: auto;
+    }
+    .btn-util:hover { background: rgba(0, 243, 255, 0.28); color: #fff; }
+
     #touch-controls {
-      position: absolute; bottom: 22px; left: 0; right: 0; z-index: 12;
-      display: none; justify-content: space-between; padding: 0 24px; pointer-events: none;
+      position: absolute;
+      bottom: 22px;
+      left: 0;
+      right: 0;
+      z-index: 30;
+      display: none;
+      justify-content: space-between;
+      padding: 0 24px;
+      pointer-events: none;
     }
     .touch-group { display: flex; gap: 12px; pointer-events: auto; }
     .touch-btn {
-      width: 64px; height: 64px; border-radius: 12px;
-      background: rgba(12, 8, 28, 0.78); border: 2px solid var(--neon-cyan);
-      color: var(--neon-cyan); font-weight: 900; font-size: 18px;
-      display: flex; align-items: center; justify-content: center;
+      width: 62px;
+      height: 62px;
+      border-radius: 12px;
+      background: rgba(12, 8, 28, 0.8);
+      border: 2px solid var(--neon-cyan);
+      color: var(--neon-cyan);
+      font-weight: 900;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
     }
-    .touch-btn:active { background: var(--neon-pink); color: #fff; }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
 
 <div id="crt-monitor">
-  <!-- Эффект сканлайнов ретро-телевизора -->
   <div id="crt-overlay"></div>
-  <div class="crt-badge">TRINITRON CYBER-DECK // KV-2099 RGB</div>
+  <div class="crt-badge">TRINITRON CYBER-DECK // MEGA INTERACTIVE OVERDRIVE</div>
 
   <canvas id="game-canvas"></canvas>
 
   <!-- ИГРОВОЙ ИНТЕРФЕЙС (HUD) -->
   <div id="hud">
     <div class="hud-top-left">
-      <div class="tv-channel-box" id="hud-channel">CH-01 // LVL 2</div>
+      <div class="pilot-hud-card">
+        <img id="hud-avatar" src="" alt="avatar" />
+        <div>
+          <div id="hud-pilot-name">NEO_RIDER</div>
+          <div id="hud-channel">CH-01 // AI LVL 2</div>
+        </div>
+      </div>
       <div class="pos-badge" id="hud-pos">1/4</div>
       <div class="item-slot">
         <div class="item-icon" id="hud-item-icon">⚡</div>
         <span id="hud-item-name">ПУСТО</span>
       </div>
+      <div class="coin-counter">🪙 <span id="hud-coins">0</span></div>
+      <button type="button" class="btn-hud-action" id="btn-cam-view">🎥 КАМЕРА (C)</button>
+      <button type="button" class="btn-hud-action" id="btn-open-menu-hud">⏸ МЕНЮ (ESC)</button>
+    </div>
+
+    <!-- ЖИВОЙ ТРЕКЕР МИССИЙ (LIVE CONTRACT) -->
+    <div class="hud-mission-tracker">
+      <div class="mission-title">⚡ АКТИВНЫЙ КИБЕР-КОНТРАКТ (+350 CR)</div>
+      <div class="mission-desc" id="hud-mission-text">Сбейте 4 кибер-ящика на трассе (0/4)</div>
+      <div class="mission-bar"><div class="mission-fill" id="hud-mission-fill"></div></div>
     </div>
 
     <div class="hud-top-right">
-      <div class="hud-lap">LAP <span id="hud-lap-val">1/3</span></div>
+      <div class="hud-lap" id="hud-lap-box">LAP <span id="hud-lap-val">1/3</span></div>
       <div class="hud-timer" id="hud-timer-val">00:00.00</div>
+      <div class="hud-combo" id="hud-combo-val"></div>
     </div>
 
     <div class="hud-bottom-left">
-      <canvas id="minimap-canvas" width="200" height="150"></canvas>
+      <canvas id="minimap-canvas" width="210" height="160"></canvas>
     </div>
 
     <div class="hud-bottom-right">
       <canvas id="speedo-canvas" width="290" height="95"></canvas>
       <div class="speed-readout">
-        <div class="speed-unit">KM/H // TELEMETRY</div>
+        <div class="speed-unit" id="hud-car-label">KM/H // #01 ROOKIE</div>
         <div class="speed-val" id="hud-speed-val">0</div>
       </div>
     </div>
@@ -229,7 +742,7 @@
 
   <div id="center-banner"></div>
 
-  <!-- Сенсорные кнопки (для планшетов и Android) -->
+  <!-- Сенсорные кнопки -->
   <div id="touch-controls">
     <div class="touch-group">
       <div class="touch-btn" data-key="left">◀</div>
@@ -242,94 +755,162 @@
     </div>
   </div>
 
-  <!-- ГЛАВНОЕ МЕНЮ -->
+  <!-- ГЛАВНЫЙ ЭКРАН МЕНЮ -->
   <div class="overlay-screen" id="main-menu">
     <div class="cyber-menu">
       <div class="menu-header">
         <div>
-          <div class="cyber-title">CYBER-KART // CRT-TV 2099</div>
-          <div style="font-size:12px; color:#9ab0d0; margin-top:4px;">
-            Ретро-телевизионная аркадная гонка • Плавное управление • 4 Города • 6 Уровней скорости
-          </div>
+          <div class="cyber-title">CYBER-KART // MEGA INTERACTIVE</div>
+          <div class="cyber-subtitle">Разрушаемые ящики • Лазерные ворота • Порталы • 3D-Ракеты и Мины • Тюнинг 25 машин • 12 Трасс</div>
         </div>
-        <div class="tv-status" id="menu-tv-status">AV-1 // SIGNAL: 60Hz NTSC</div>
-      </div>
-
-      <!-- ВЫБОР УРОВНЯ СЛОЖНОСТИ (6 УРОВНЕЙ СКОРОСТИ) -->
-      <div class="cyber-box" style="margin-bottom: 16px;">
-        <h3>1. Уровень сложности и Скорость (6 уровней — идеально для 12–14 лет и профи)</h3>
-        <div class="btn-grid-6" id="level-selector">
-          <div class="opt-btn" data-lvl="0">LVL 1<small>Прогулка 50cc</small></div>
-          <div class="opt-btn active" data-lvl="1">LVL 2<small>Комфорт 80cc</small></div>
-          <div class="opt-btn" data-lvl="2">LVL 3<small>Стандарт 100cc</small></div>
-          <div class="opt-btn" data-lvl="3">LVL 4<small>Драйв 125cc</small></div>
-          <div class="opt-btn" data-lvl="4">LVL 5<small>Турбо 150cc</small></div>
-          <div class="opt-btn" data-lvl="5">LVL 6<small>Кибер-Бог 200cc</small></div>
-        </div>
-      </div>
-
-      <div class="grid-2col">
-        <!-- ВЫБОР ГОРОДА И ТРАССЫ -->
-        <div class="cyber-box">
-          <h3>2. Выберите Город / Канал ТВ (Разные карты и фоны)</h3>
-          <div class="btn-grid" id="track-selector">
-            <div class="opt-btn active" data-track="0">
-              CH-01: Neo-Tokyo Desk
-              <small>RGB-Стол + Небоскребы</small>
-            </div>
-            <div class="opt-btn" data-track="1">
-              CH-02: Synthwave Miami
-              <small>Ретро-закат + Пальмы</small>
-            </div>
-            <div class="opt-btn" data-track="2">
-              CH-03: Cyber-Moscow 2099
-              <small>Неоновые башни + Мосты</small>
-            </div>
-            <div class="opt-btn" data-track="3">
-              CH-04: Orbital Sector-7
-              <small>Космос + Кольцо станции</small>
-            </div>
-          </div>
-        </div>
-
-        <!-- ВЫБОР БОЛИДА -->
-        <div class="cyber-box">
-          <h3>3. Выберите Болид (4 уникальных 3D-шасси)</h3>
-          <div class="btn-grid" id="car-selector">
-            <div class="opt-btn active" data-car="0">
-              Crimson Kart
-              <small>Классик • Баланс</small>
-            </div>
-            <div class="opt-btn" data-car="1">
-              Cyber-Truck V8
-              <small>Броневик • Устойчивый</small>
-            </div>
-            <div class="opt-btn" data-car="2">
-              Photon Formula
-              <small>F1-Прототип • Цепкий</small>
-            </div>
-            <div class="opt-btn" data-car="3">
-              Outrun Muscle
-              <small>Ретро-Купе • Дрифт</small>
+        <div class="header-profile-summary">
+          <img id="header-avatar-img" src="" alt="Avatar" />
+          <div>
+            <div class="hp-name" id="header-pilot-name">NEO_RIDER</div>
+            <div class="hp-stats">
+              <span>⭐ РАНГ <b id="header-level">1</b></span>
+              <span>🪙 <b id="header-credits">800</b> CR</span>
+              <span>🏎️ <b id="header-cars-count">1/25</b></span>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="cyber-box" style="margin-bottom: 14px; font-size: 12px; color: #b8d0eb; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
-        <span>🎮 <b>W/A/S/D или Стрелки</b> — Плавный газ и руль</span>
-        <span>🔥 <b>Пробел (Space)</b> — Мягкий дрифт (заряд турбо)</span>
-        <span>⚡ <b>Shift</b> — Активировать бонус</span>
-        <span>⏸ <b>Esc</b> — Пауза / Смена канала</span>
+      <!-- Навигация по вкладкам -->
+      <div class="nav-tabs">
+        <button type="button" class="tab-btn active" data-tab="tab-race">🏁 1. 12 ТРАСС И ИНТЕРАКТИВ</button>
+        <button type="button" class="tab-btn" data-tab="tab-garage">🔧 2. ГАРАЖ (25) И ТЮНИНГ</button>
+        <button type="button" class="tab-btn" data-tab="tab-profile">🎰 3. ПРОФИЛЬ И РУЛЕТКА</button>
       </div>
 
+      <!-- ВКЛАДКА 1: РЕЖИМ, ПОГОДА, 6 УРОВНЕЙ ИИ И 12 ТРАСС -->
+      <div class="tab-content active" id="tab-race">
+        <div class="cyber-box" style="margin-bottom: 8px;">
+          <h3>1. Режим Игры и Интерактивная Погода</h3>
+          <div class="btn-grid-4" id="mode-weather-row">
+            <div class="opt-btn active" data-mode="race">
+              🏆 ГРАН-ПРИ (12 ТРАСС)
+              <small id="race-car-indicator">Машина: #01 Rookie</small>
+            </div>
+            <div class="opt-btn" data-mode="freeroam">
+              🌆 КИБЕР МИНИ-ГОРОД
+              <small>Маяки, Рампы, Разрушение</small>
+            </div>
+            <div class="opt-btn active" data-weather="clear">
+              🌌 ПОГОДА: ЯСНЫЙ НЕОН
+              <small>Чистая видимость</small>
+            </div>
+            <div class="opt-btn" data-weather="storm">
+              🌧️ КИБЕР-ШТОРМ (ЧАСТИЦЫ)
+              <small>Неоновый дождь / Снег</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="cyber-box" style="margin-bottom: 8px;">
+          <h3>2. Уровень Соперников (Управляет ТОЛЬКО УМОМ ИИ и КОЛИЧЕСТВОМ БОТОВ — от 2 до 7)</h3>
+          <div class="btn-grid-6" id="level-selector">
+            <div class="opt-btn" data-lvl="0">LVL 1: Новичок<small>2 Бота • ИИ 65%</small></div>
+            <div class="opt-btn active" data-lvl="1">LVL 2: Любитель<small>3 Бота • ИИ 75%</small></div>
+            <div class="opt-btn" data-lvl="2">LVL 3: Гонщик<small>4 Бота • ИИ 84%</small></div>
+            <div class="opt-btn" data-lvl="3">LVL 4: Профи<small>5 Ботов • ИИ 92%</small></div>
+            <div class="opt-btn" data-lvl="4">LVL 5: Мастер<small>6 Ботов • ИИ 98%</small></div>
+            <div class="opt-btn" data-lvl="5">LVL 6: Кибер-Бог<small>7 Ботов • ИИ 105%</small></div>
+          </div>
+        </div>
+
+        <div class="cyber-box" style="margin-bottom: 8px;">
+          <h3>3. Выберите одну из 12 Трасс (На каждой: Кибер-Ящики, Лазерные Ворота, Телепорты и Трамплины!)</h3>
+          <div class="btn-grid-12" id="track-selector"></div>
+        </div>
+
+        <div class="cyber-box" style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px; font-size:11px; color:#c8e4ff;">
+          <span>📦 <b>Тараньте розовые ящики</b> (+25 CR + Нитро)</span>
+          <span>🌀 <b>Влетайте в синие порталы</b> (Телепорт вперед)</span>
+          <span>🚀 <b>Shift</b> — Стрельба 3D-ракетой / Мина / Щит</span>
+          <span>🔥 <b>Space</b> — Дрифт / <b>Трюк в полете</b></span>
+          <span>🎺 <b>H</b> — Кибер-Гудок (Волна)</span>
+        </div>
+      </div>
+
+      <!-- ВКЛАДКА 2: ГАРАЖ НА 25 БОЛИДОВ + МАСТЕРСКАЯ ТЮНИНГА -->
+      <div class="tab-content" id="tab-garage">
+        <div class="tuning-panel">
+          <div class="cyber-box">
+            <h3>🔧 Тюнинг-Ателье Выбранного Болида: <span id="selected-car-title" style="color:#00ff66;">#01 Rookie Micro</span></h3>
+            <div class="upgrade-row">
+              <span>⚡ Форсировка Двигателя (+Скорость)</span>
+              <div class="upgrade-dots" id="dots-engine"></div>
+              <button type="button" class="btn-util" id="btn-upg-engine">УЛУЧШИТЬ (250 CR)</button>
+            </div>
+            <div class="upgrade-row">
+              <span>🔥 Давление Турбины (+Разгон)</span>
+              <div class="upgrade-dots" id="dots-turbo"></div>
+              <button type="button" class="btn-util" id="btn-upg-turbo">УЛУЧШИТЬ (250 CR)</button>
+            </div>
+            <div class="upgrade-row" style="margin-bottom:0;">
+              <span>🛞 Магнитные Шины (+Рулежка)</span>
+              <div class="upgrade-dots" id="dots-tires"></div>
+              <button type="button" class="btn-util" id="btn-upg-tires">УЛУЧШИТЬ (250 CR)</button>
+            </div>
+          </div>
+
+          <div class="cyber-box">
+            <h3>🎨 Кастомизация Неона Днища и Спойлера</h3>
+            <div style="font-size:11px; color:#9bd; margin-bottom:6px;">Выберите цвет свечения вашего болида (бесплатно):</div>
+            <div class="neon-swatch-row" id="neon-picker">
+              <div class="neon-swatch" data-neon="0x00f3ff" style="background:#00f3ff;"></div>
+              <div class="neon-swatch" data-neon="0xff007f" style="background:#ff007f;"></div>
+              <div class="neon-swatch" data-neon="0x00ff66" style="background:#00ff66;"></div>
+              <div class="neon-swatch" data-neon="0xffe600" style="background:#ffe600;"></div>
+              <div class="neon-swatch" data-neon="0xaa00ff" style="background:#aa00ff;"></div>
+              <div class="neon-swatch" data-neon="0xff3300" style="background:#ff3300;"></div>
+            </div>
+            <div style="font-size:11px; color:var(--neon-yellow); margin-top:10px;" id="tuning-summary-text">
+              Итоговая макс. скорость с учетом тюнинга: 52 км/ч
+            </div>
+          </div>
+        </div>
+
+        <div class="garage-grid" id="garage-list"></div>
+      </div>
+
+      <!-- ВКЛАДКА 3: ПРОФИЛЬ И КОЛЕСО ФОРТУНЫ -->
+      <div class="tab-content" id="tab-profile">
+        <div class="profile-layout">
+          <div class="cyber-box">
+            <h3>Настройка Имени и Аватарки Пилота</h3>
+            <label class="field-label">Позывной / Имя игрока:</label>
+            <div style="display:flex; gap:8px; margin-bottom:12px;">
+              <input type="text" id="pilot-name-input" maxlength="16" placeholder="Введите имя..." />
+              <button type="button" class="btn-util" id="btn-save-name">СОХРАНИТЬ</button>
+            </div>
+
+            <label class="field-label">Выберите Кибер-Аватарку (8 героев):</label>
+            <div class="avatar-grid" id="avatar-selector"></div>
+          </div>
+
+          <div class="cyber-box">
+            <h3>🎰 Кибер-Рулетка и Карьерное Досье</h3>
+            <div class="stats-table" id="profile-stats-box"></div>
+            <div style="margin-top: 12px; display:flex; gap:8px; flex-wrap:wrap;">
+              <button type="button" class="btn-util" id="btn-spin-wheel" style="border-color:var(--neon-yellow); color:var(--neon-yellow);">🎰 КРУТИТЬ РУЛЕТКУ ПРИЗОВ (БЕСПЛАТНО)</button>
+              <button type="button" class="btn-util" id="btn-gift-credits">🎁 +2000 CR</button>
+              <button type="button" class="btn-util" id="btn-reset-save" style="border-color:#ff3355; color:#ff6688;">🗑️ Сброс</button>
+            </div>
+            <div id="wheel-result-msg" style="margin-top:8px; font-size:12px; font-weight:900; color:var(--neon-green);"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Нижняя панель -->
       <div class="menu-footer">
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="btn-util" id="btn-toggle-crt">📺 Эффект ЭЛТ-Телевизора: ВКЛ</button>
-          <button class="btn-util" id="btn-toggle-touch">📱 Сенсорные кнопки: ВЫКЛ</button>
-          <button class="btn-util" id="btn-export-assets">💾 Скачать PNG/JPEG текстуры</button>
+          <button type="button" class="btn-util" id="btn-toggle-crt">📺 ЭЛТ-Фильтр: ВЫКЛ</button>
+          <button type="button" class="btn-util" id="btn-toggle-touch">📱 Сенсор: ВЫКЛ</button>
+          <button type="button" class="btn-util" id="btn-export-assets">💾 Скачать PNG/JPEG ассеты</button>
         </div>
-        <button class="btn-launch" id="btn-start-race">ВКЛЮЧИТЬ ЭФИР // СТАРТ ▶</button>
+        <button type="button" class="btn-launch" id="btn-start-race">НА СТАРТ ГОНКИ ▶</button>
       </div>
     </div>
   </div>
@@ -338,64 +919,248 @@
 <script>
 /**
  * ============================================================================
- * 1. КОНФИГУРАЦИЯ УРОВНЕЙ СЛОЖНОСТИ, ГОРОДОВ И БОЛИДОВ
- * Настроено так, чтобы разгон был плавным и комфортным для игрока 12-14 лет!
+ * 1. КАТАЛОГ ИЗ 25 БОЛИДОВ (Скорость зависит от машины + прокачки в гараже)
  * ============================================================================
  */
-const DIFFICULTY_LEVELS = [
-  { level: 1, label: 'LVL 1 (50cc)',  maxSpeed: 26, accel: 13, handling: 2.25, aiRatio: 0.72 },
-  { level: 2, label: 'LVL 2 (80cc)',  maxSpeed: 32, accel: 16, handling: 2.35, aiRatio: 0.80 },
-  { level: 3, label: 'LVL 3 (100cc)', maxSpeed: 38, accel: 19, handling: 2.45, aiRatio: 0.86 },
-  { level: 4, label: 'LVL 4 (125cc)', maxSpeed: 44, accel: 22, handling: 2.55, aiRatio: 0.91 },
-  { level: 5, label: 'LVL 5 (150cc)', maxSpeed: 50, accel: 26, handling: 2.65, aiRatio: 0.95 },
-  { level: 6, label: 'LVL 6 (200cc)', maxSpeed: 58, accel: 31, handling: 2.80, aiRatio: 1.00 }
+const CAR_CATALOG = [
+  { id: 0,  name: '#01 Rookie Micro',    tier: 'D-CLASS', style: 'kart',    color: 0xff1e38, neon: 0x00f3ff, price: 0,     maxSpeed: 22, accel: 12, handling: 2.35, kmh: 52 },
+  { id: 1,  name: '#02 Pixel Cruiser',   tier: 'D-CLASS', style: 'buggy',   color: 0x00d8ff, neon: 0xffe600, price: 150,   maxSpeed: 24, accel: 13, handling: 2.38, kmh: 58 },
+  { id: 2,  name: '#03 Arcade Buggy',    tier: 'D-CLASS', style: 'buggy',   color: 0x00ff66, neon: 0xff007f, price: 250,   maxSpeed: 25, accel: 14, handling: 2.40, kmh: 61 },
+  { id: 3,  name: '#04 Desk Runner',     tier: 'D-CLASS', style: 'kart',    color: 0xffaa00, neon: 0x00f3ff, price: 350,   maxSpeed: 27, accel: 15, handling: 2.42, kmh: 65 },
+  { id: 4,  name: '#05 Neon Hopper',     tier: 'D-CLASS', style: 'muscle',  color: 0xaa00ff, neon: 0x00ff66, price: 450,   maxSpeed: 28, accel: 16, handling: 2.44, kmh: 68 },
+
+  { id: 5,  name: '#06 Tokyo Drifter',   tier: 'C-CLASS', style: 'muscle',  color: 0xff007f, neon: 0x00f3ff, price: 600,   maxSpeed: 30, accel: 17, handling: 2.48, kmh: 72 },
+  { id: 6,  name: '#07 Sunset Coupe',    tier: 'C-CLASS', style: 'muscle',  color: 0xff5500, neon: 0xffe600, price: 750,   maxSpeed: 32, accel: 18, handling: 2.50, kmh: 77 },
+  { id: 7,  name: '#08 Cyber-Truck V6',  tier: 'C-CLASS', style: 'truck',   color: 0x668899, neon: 0x00f3ff, price: 900,   maxSpeed: 33, accel: 18, handling: 2.42, kmh: 80 },
+  { id: 8,  name: '#09 Shibuya GT',      tier: 'C-CLASS', style: 'kart',    color: 0x00ffcc, neon: 0xff007f, price: 1100,  maxSpeed: 35, accel: 19, handling: 2.55, kmh: 84 },
+  { id: 9,  name: '#10 Synth Striker',   tier: 'C-CLASS', style: 'formula', color: 0xffcc00, neon: 0x9900ff, price: 1300,  maxSpeed: 37, accel: 20, handling: 2.58, kmh: 88 },
+
+  { id: 10, name: '#11 Night Stalker',   tier: 'B-CLASS', style: 'muscle',  color: 0x1a1c2c, neon: 0xff0055, price: 1600,  maxSpeed: 38, accel: 21, handling: 2.60, kmh: 92 },
+  { id: 11, name: '#12 Goliath Armor',   tier: 'B-CLASS', style: 'truck',   color: 0x22aa44, neon: 0xffe600, price: 1900,  maxSpeed: 40, accel: 22, handling: 2.52, kmh: 96 },
+  { id: 12, name: '#13 Aero Interceptor',tier: 'B-CLASS', style: 'formula', color: 0x0088ff, neon: 0x00ffcc, price: 2200,  maxSpeed: 42, accel: 23, handling: 2.65, kmh: 101 },
+  { id: 13, name: '#14 Plasma Rally',    tier: 'B-CLASS', style: 'buggy',   color: 0xff3300, neon: 0x00f3ff, price: 2500,  maxSpeed: 43, accel: 24, handling: 2.68, kmh: 104 },
+  { id: 14, name: '#15 Outrun Turbo',    tier: 'B-CLASS', style: 'muscle',  color: 0xe6192e, neon: 0xffe600, price: 2900,  maxSpeed: 45, accel: 25, handling: 2.70, kmh: 108 },
+
+  { id: 15, name: '#16 Photon F1',       tier: 'A-CLASS', style: 'formula', color: 0x00ff66, neon: 0x00f3ff, price: 3400,  maxSpeed: 47, accel: 26, handling: 2.75, kmh: 113 },
+  { id: 16, name: '#17 Moscow Valkyrie', tier: 'A-CLASS', style: 'hyper',   color: 0xff0055, neon: 0xffe600, price: 3900,  maxSpeed: 49, accel: 27, handling: 2.78, kmh: 118 },
+  { id: 17, name: '#18 Cyber-Truck V12', tier: 'A-CLASS', style: 'truck',   color: 0x00d8ff, neon: 0xff007f, price: 4400,  maxSpeed: 50, accel: 28, handling: 2.68, kmh: 121 },
+  { id: 18, name: '#19 Vortex Blade',    tier: 'A-CLASS', style: 'hyper',   color: 0x8800ff, neon: 0x00ff66, price: 5000,  maxSpeed: 52, accel: 29, handling: 2.82, kmh: 125 },
+  { id: 19, name: '#20 Tachyon Apex',    tier: 'A-CLASS', style: 'formula', color: 0xffffff, neon: 0xff007f, price: 5600,  maxSpeed: 54, accel: 30, handling: 2.86, kmh: 130 },
+
+  { id: 20, name: '#21 Quantum Phantom', tier: 'S-CLASS', style: 'hyper',   color: 0x00f3ff, neon: 0xffffff, price: 6500,  maxSpeed: 56, accel: 32, handling: 2.90, kmh: 135 },
+  { id: 21, name: '#22 Void Singularity',tier: 'S-CLASS', style: 'hyper',   color: 0x11052C, neon: 0x00f3ff, price: 7500,  maxSpeed: 58, accel: 33, handling: 2.94, kmh: 140 },
+  { id: 22, name: '#23 Solar Flare X',   tier: 'S-CLASS', style: 'formula', color: 0xffe600, neon: 0xff007f, price: 8500,  maxSpeed: 60, accel: 35, handling: 2.98, kmh: 145 },
+  { id: 23, name: '#24 Chrono Drifter',  tier: 'S-CLASS', style: 'hyper',   color: 0x00ff88, neon: 0x00f3ff, price: 9500,  maxSpeed: 62, accel: 36, handling: 3.02, kmh: 150 },
+  { id: 24, name: '#25 OVERLORD 2099',   tier: 'S-GOD',   style: 'hyper',   color: 0xff0055, neon: 0x00f3ff, price: 12000, maxSpeed: 65, accel: 38, handling: 3.10, kmh: 156 }
 ];
 
-const CITY_THEMES = [
+const DIFFICULTY_LEVELS = [
+  { level: 1, label: 'LVL 1: Новичок',   botCount: 2, aiSkill: 0.68, aiSteerSharpness: 1.6, aiWander: 8.5, itemChance: 0.25, rewardMult: 1.0 },
+  { level: 2, label: 'LVL 2: Любитель',  botCount: 3, aiSkill: 0.78, aiSteerSharpness: 2.0, aiWander: 6.5, itemChance: 0.45, rewardMult: 1.3 },
+  { level: 3, label: 'LVL 3: Гонщик',    botCount: 4, aiSkill: 0.86, aiSteerSharpness: 2.4, aiWander: 4.5, itemChance: 0.65, rewardMult: 1.7 },
+  { level: 4, label: 'LVL 4: Профи',     botCount: 5, aiSkill: 0.93, aiSteerSharpness: 2.9, aiWander: 3.0, itemChance: 0.80, rewardMult: 2.2 },
+  { level: 5, label: 'LVL 5: Мастер',    botCount: 6, aiSkill: 0.98, aiSteerSharpness: 3.4, aiWander: 1.8, itemChance: 0.92, rewardMult: 2.8 },
+  { level: 6, label: 'LVL 6: Кибер-Бог', botCount: 7, aiSkill: 1.04, aiSteerSharpness: 4.0, aiWander: 0.8, itemChance: 1.00, rewardMult: 3.8 }
+];
+
+const TRACK_CATALOG = [
   {
-    id: 'tokyo',
-    name: 'CH-01 // NEO-TOKYO DESK',
-    skyTop: '#08031a', skyBottom: '#2b0938', fogColor: 0x160729,
-    roadColor: '#22202b', lineColor: '#00f3ff',
-    stripeA: '#ff1e42', stripeB: '#f2f6ff',
-    floorColor: '#1a1228', gridColor: '#00f3ff'
+    id: 0, code: 'CH-01', name: 'Neo-Tokyo Desk', desc: 'RGB-Клавиатура + Мосты', propType: 'keyboard',
+    skyTop: '#08031a', skyBottom: '#2b0938', fogColor: 0x160729, roadColor: '#22202b', lineColor: '#00f3ff', stripeA: '#ff1e42', stripeB: '#f2f6ff', floorColor: '#1a1228', gridColor: '#00f3ff',
+    pts: [[-28,2.5,78],[38,2.5,78],[90,6,50],[92,14,-5],[35,17.5,-25],[-25,14,-10],[-75,8,-45],[-105,5,0],[-85,3,58]]
   },
   {
-    id: 'miami',
-    name: 'CH-02 // SYNTHWAVE MIAMI',
-    skyTop: '#16002b', skyBottom: '#ff3864', fogColor: 0x3b0944,
-    roadColor: '#241434', lineColor: '#ffe600',
-    stripeA: '#ff007f', stripeB: '#00f3ff',
-    floorColor: '#120422', gridColor: '#ff007f'
+    id: 1, code: 'CH-02', name: 'Synthwave Miami', desc: 'Пальмы + Океанский закат', propType: 'palms',
+    skyTop: '#16002b', skyBottom: '#ff3864', fogColor: 0x3b0944, roadColor: '#241434', lineColor: '#ffe600', stripeA: '#ff007f', stripeB: '#00f3ff', floorColor: '#120422', gridColor: '#ff007f',
+    pts: [[-30,2.5,82],[45,2.5,82],[105,5,35],[95,10,-45],[25,6,-75],[-45,11,-55],[-105,6,-5],[-88,3,62]]
   },
   {
-    id: 'moscow',
-    name: 'CH-03 // CYBER-MOSCOW 2099',
-    skyTop: '#030b1c', skyBottom: '#003b5c', fogColor: 0x061b30,
-    roadColor: '#1a222d', lineColor: '#ff2a4b',
-    stripeA: '#ff2a2a', stripeB: '#ffd000',
-    floorColor: '#09131c', gridColor: '#00ff88'
+    id: 2, code: 'CH-03', name: 'Cyber-Moscow 2099', desc: 'Голо-Башни + Эстакады', propType: 'spires',
+    skyTop: '#030b1c', skyBottom: '#003b5c', fogColor: 0x061b30, roadColor: '#1a222d', lineColor: '#ff2a4b', stripeA: '#ff2a2a', stripeB: '#ffd000', floorColor: '#09131c', gridColor: '#00ff88',
+    pts: [[-25,3,80],[40,3,80],[98,9,42],[70,18,-18],[95,12,-70],[0,20,-82],[-90,12,-50],[-60,6,10],[-92,3.5,60]]
   },
   {
-    id: 'orbital',
-    name: 'CH-04 // ORBITAL SECTOR-7',
-    skyTop: '#000005', skyBottom: '#081b33', fogColor: 0x030914,
-    roadColor: '#151b26', lineColor: '#00ff66',
-    stripeA: '#00f3ff', stripeB: '#121824',
-    floorColor: '#02040a', gridColor: '#4466ff'
+    id: 3, code: 'CH-04', name: 'Orbital Sector-7', desc: 'Космическая станция', propType: 'rings',
+    skyTop: '#000005', skyBottom: '#081b33', fogColor: 0x030914, roadColor: '#151b26', lineColor: '#00ff66', stripeA: '#00f3ff', stripeB: '#121824', floorColor: '#02040a', gridColor: '#4466ff',
+    pts: [[-30,4,85],[45,4,85],[112,12,25],[75,22,-60],[0,10,-25],[-75,22,-60],[-112,12,25],[-85,4.5,72]]
+  },
+  {
+    id: 4, code: 'CH-05', name: 'Kyoto Sakura Drift', desc: 'Неоновые Тории + Сад', propType: 'torii',
+    skyTop: '#1a041c', skyBottom: '#ff44aa', fogColor: 0x2a082e, roadColor: '#261828', lineColor: '#ff88dd', stripeA: '#ff0055', stripeB: '#ffffff', floorColor: '#18061a', gridColor: '#ff66cc',
+    pts: [[-28,2.5,76],[42,2.5,76],[85,5,45],[50,9,5],[95,14,-35],[35,16,-80],[-35,12,-65],[-95,7,-20],[-80,3,52]]
+  },
+  {
+    id: 5, code: 'CH-06', name: 'Nevada Canyon', desc: 'Красные скалы + Дамба', propType: 'canyon',
+    skyTop: '#240804', skyBottom: '#ff6600', fogColor: 0x331105, roadColor: '#2d201c', lineColor: '#ffcc00', stripeA: '#ff5500', stripeB: '#222222', floorColor: '#220e08', gridColor: '#ff8800',
+    pts: [[-30,2.5,84],[50,2.5,84],[110,8,40],[85,18,-25],[15,22,-65],[-55,15,-75],[-110,8,-20],[-85,3,58]]
+  },
+  {
+    id: 6, code: 'CH-07', name: 'Arctic Zero Lab', desc: 'Ледяные кристаллы', propType: 'ice',
+    skyTop: '#02162e', skyBottom: '#00d8ff', fogColor: 0x052844, roadColor: '#1c2e3d', lineColor: '#ffffff', stripeA: '#00f3ff', stripeB: '#ffffff', floorColor: '#081e30', gridColor: '#66ffff',
+    pts: [[-25,2.5,78],[40,2.5,78],[95,4,30],[65,8,-15],[90,12,-65],[0,15,-85],[-90,12,-65],[-65,8,-15],[-95,4,45]]
+  },
+  {
+    id: 7, code: 'CH-08', name: 'Cairo Cyber-Dunes', desc: 'Неоновые Пирамиды', propType: 'pyramids',
+    skyTop: '#1c1002', skyBottom: '#ffaa00', fogColor: 0x2e1a04, roadColor: '#2a2218', lineColor: '#ffe600', stripeA: '#ffaa00', stripeB: '#1a1410', floorColor: '#1f1508', gridColor: '#ffcc00',
+    pts: [[-32,2.5,80],[48,2.5,80],[105,6,20],[70,12,-55],[0,18,-80],[-70,12,-55],[-105,6,20],[-82,3,62]]
+  },
+  {
+    id: 8, code: 'CH-09', name: 'Silicon Circuit', desc: 'Материнская плата ПК', propType: 'chips',
+    skyTop: '#021a0c', skyBottom: '#00ff66', fogColor: 0x042814, roadColor: '#12241a', lineColor: '#00ff66', stripeA: '#00ff66', stripeB: '#112218', floorColor: '#05140c', gridColor: '#00ff66',
+    pts: [[-28,2.5,78],[42,2.5,78],[92,6,60],[92,12,-10],[35,12,-10],[35,18,-70],[-55,18,-70],[-98,8,-15],[-88,3,58]]
+  },
+  {
+    id: 9, code: 'CH-10', name: 'Mars Colony Dome', desc: 'Красный купол + Кратеры', propType: 'domes',
+    skyTop: '#1f0308', skyBottom: '#ff2a4b', fogColor: 0x2d050d, roadColor: '#28161a', lineColor: '#00f3ff', stripeA: '#ff2a4b', stripeB: '#ffffff', floorColor: '#1c060b', gridColor: '#ff4466',
+    pts: [[-26,3,80],[44,3,80],[102,9,32],[88,16,-40],[18,8,-50],[-28,16,-82],[-96,11,-38],[-86,3.5,56]]
+  },
+  {
+    id: 10, code: 'CH-11', name: 'Aqua Atlantis Tube', desc: 'Подводный био-купол', propType: 'pillars',
+    skyTop: '#010c24', skyBottom: '#00ffcc', fogColor: 0x032238, roadColor: '#142430', lineColor: '#00ffcc', stripeA: '#00ffcc', stripeB: '#004466', floorColor: '#041220', gridColor: '#00ffcc',
+    pts: [[-30,2.5,82],[46,2.5,82],[100,7,48],[60,14,0],[100,20,-52],[0,24,-85],[-100,16,-45],[-65,8,10],[-90,3,60]]
+  },
+  {
+    id: 11, code: 'CH-12', name: 'Quantum Collider', desc: 'Финальное гипер-кольцо', propType: 'collider',
+    skyTop: '#0c0224', skyBottom: '#aa00ff', fogColor: 0x180438, roadColor: '#1c122e', lineColor: '#ffe600', stripeA: '#aa00ff', stripeB: '#00f3ff', floorColor: '#0c041c', gridColor: '#00f3ff',
+    pts: [[-32,4,86],[52,4,86],[115,14,30],[80,26,-55],[0,18,-15],[-80,26,-55],[-115,14,30],[-88,4.5,68]]
   }
 ];
 
-const CAR_SPECS = [
-  { name: 'Crimson Kart',   style: 'kart',    color: 0xff1e38, speedBonus: 1.00, accelBonus: 1.00, turnBonus: 1.00 },
-  { name: 'Cyber-Truck V8', style: 'truck',   color: 0x00d8ff, speedBonus: 1.04, accelBonus: 0.92, turnBonus: 0.94 },
-  { name: 'Photon Formula', style: 'formula', color: 0x00ff66, speedBonus: 1.03, accelBonus: 1.05, turnBonus: 1.08 },
-  { name: 'Outrun Muscle',  style: 'muscle',  color: 0xff00aa, speedBonus: 1.02, accelBonus: 0.98, turnBonus: 1.05 }
+const AVATAR_PRESETS = [
+  { id: 0, title: 'Кайто // Нео-Гонщик',   bg1: '#ff007f', bg2: '#0b0420', visor: '#00f3ff', hair: '#ffe600', icon: 'helmet' },
+  { id: 1, title: 'Нова // Кибер-Ниндзя',  bg1: '#00f3ff', bg2: '#071426', visor: '#ff007f', hair: '#00ffcc', icon: 'ninja' },
+  { id: 2, title: 'Рекс // Синт-Пилот',    bg1: '#ffe600', bg2: '#240830', visor: '#00ff66', hair: '#ff3300', icon: 'synth' },
+  { id: 3, title: 'Юки // Токио Дрифт',    bg1: '#00ff66', bg2: '#082018', visor: '#ffe600', hair: '#ff66cc', icon: 'cat' },
+  { id: 4, title: 'Блиц // ИИ-Дроид',      bg1: '#7000ff', bg2: '#0a051c', visor: '#00f3ff', hair: '#aaaaaa', icon: 'bot' },
+  { id: 5, title: 'Валькирия // Спец',     bg1: '#ff2a4b', bg2: '#1f0610', visor: '#00f3ff', hair: '#ffffff', icon: 'valk' },
+  { id: 6, title: 'Астро // Орбита-7',     bg1: '#0088ff', bg2: '#03081a', visor: '#ffe600', hair: '#00f3ff', icon: 'astro' },
+  { id: 7, title: 'Оверлорд // Босс',      bg1: '#ff0055', bg2: '#050008', visor: '#ff0000', hair: '#ffe600', icon: 'boss' }
 ];
 
 /**
  * ============================================================================
- * 2. ПРОЦЕДУРНЫЙ ГЕНЕРАТОР PNG/JPEG ТЕКСТУР И ФОНОВ ГОРОДОВ
+ * 2. МЕНЕДЖЕР ПРОФИЛЯ, ТЮНИНГА И КОЛЕСА ФОРТУНЫ
+ * ============================================================================
+ */
+class ProfileManager {
+  constructor() {
+    this.storageKey = 'cyber_kart_2099_profile_v5';
+    this.avatarURLs = [];
+    this.generateAvatarImages();
+    this.load();
+  }
+
+  generateAvatarImages() {
+    this.avatarURLs = AVATAR_PRESETS.map(av => {
+      const c = document.createElement('canvas');
+      c.width = 128; c.height = 128;
+      const ctx = c.getContext('2d');
+      const g = ctx.createLinearGradient(0, 0, 128, 128);
+      g.addColorStop(0, av.bg1);
+      g.addColorStop(1, av.bg2);
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 128, 128);
+
+      ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+      for (let i = 0; i < 128; i += 16) {
+        ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(128, i); ctx.stroke();
+      }
+
+      ctx.fillStyle = '#141624';
+      ctx.beginPath(); ctx.arc(64, 132, 46, Math.PI, 0); ctx.fill();
+      ctx.strokeStyle = av.visor; ctx.lineWidth = 3; ctx.stroke();
+
+      ctx.fillStyle = '#222638';
+      ctx.beginPath(); ctx.arc(64, 58, 34, 0, Math.PI * 2); ctx.fill();
+
+      ctx.fillStyle = av.hair;
+      if (av.icon === 'cat') {
+        ctx.beginPath(); ctx.moveTo(34, 40); ctx.lineTo(42, 16); ctx.lineTo(54, 30); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(94, 40); ctx.lineTo(86, 16); ctx.lineTo(74, 30); ctx.fill();
+      } else {
+        ctx.fillRect(58, 18, 12, 18);
+      }
+
+      ctx.fillStyle = av.visor;
+      ctx.fillRect(38, 48, 52, 16);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(42, 50, 18, 4);
+
+      return c.toDataURL('image/png');
+    });
+  }
+
+  load() {
+    try {
+      const raw = window.localStorage.getItem(this.storageKey);
+      if (raw) {
+        this.data = JSON.parse(raw);
+        if (!Array.isArray(this.data.unlockedCars)) this.data.unlockedCars = [0];
+        if (!this.data.carUpgrades) this.data.carUpgrades = {};
+        return;
+      }
+    } catch (e) {}
+    this.resetToDefault();
+  }
+
+  resetToDefault() {
+    this.data = {
+      pilotName: 'NEO_RIDER',
+      avatarId: 0,
+      credits: 800,
+      xp: 0,
+      racesPlayed: 0,
+      wins: 0,
+      stuntsDone: 0,
+      cratesSmashing: 0,
+      unlockedCars: [0],
+      selectedCarId: 0,
+      customNeon: null,
+      carUpgrades: {}
+    };
+    this.save();
+  }
+
+  getUpgradesForCar(carId) {
+    if (!this.data.carUpgrades[carId]) {
+      this.data.carUpgrades[carId] = { engine: 0, turbo: 0, tires: 0 };
+    }
+    return this.data.carUpgrades[carId];
+  }
+
+  getEffectiveCarStats(carId) {
+    const base = CAR_CATALOG[carId] || CAR_CATALOG[0];
+    const upg = this.getUpgradesForCar(carId);
+    const maxSpeed = base.maxSpeed + upg.engine * 1.6;
+    const accel = base.accel + upg.turbo * 1.4;
+    const handling = base.handling + upg.tires * 0.08;
+    const kmh = Math.round(base.kmh + upg.engine * 4);
+    const neon = this.data.customNeon !== null ? this.data.customNeon : base.neon;
+    return { ...base, maxSpeed, accel, handling, kmh, neon };
+  }
+
+  save() {
+    try {
+      window.localStorage.setItem(this.storageKey, JSON.stringify(this.data));
+    } catch (e) {}
+  }
+
+  getRankLevel() {
+    return 1 + Math.floor(this.data.xp / 250);
+  }
+
+  addReward(credits, xp, isWin = false) {
+    this.data.credits += Math.round(credits);
+    this.data.xp += Math.round(xp);
+    this.data.racesPlayed += 1;
+    if (isWin) this.data.wins += 1;
+    this.save();
+  }
+}
+
+/**
+ * ============================================================================
+ * 3. ГЕНЕРАТОР PNG/JPEG ТЕКСТУР
  * ============================================================================
  */
 class AssetVault {
@@ -404,30 +1169,21 @@ class AssetVault {
     this.dataURLs = {};
   }
 
-  buildThemeAssets(themeIdx) {
-    const theme = CITY_THEMES[themeIdx];
+  buildThemeAssets(trackIdx) {
+    const theme = TRACK_CATALOG[trackIdx] || TRACK_CATALOG[0];
 
-    // 1. Текстура асфальта под выбранный город
     const cRoad = document.createElement('canvas');
     cRoad.width = 512; cRoad.height = 512;
     const ctxR = cRoad.getContext('2d');
     ctxR.fillStyle = theme.roadColor;
     ctxR.fillRect(0, 0, 512, 512);
-    for (let i = 0; i < 6000; i++) {
-      ctxR.fillStyle = i % 2 === 0 ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.08)';
-      ctxR.fillRect(Math.random() * 512, Math.random() * 512, 2, 2);
-    }
-    // Неоновые краевые полосы и центральный пунктир
     ctxR.fillStyle = theme.lineColor;
     ctxR.fillRect(20, 0, 12, 512);
     ctxR.fillRect(480, 0, 12, 512);
     ctxR.fillStyle = 'rgba(255,255,255,0.28)';
-    for (let y = 0; y < 512; y += 64) {
-      ctxR.fillRect(252, y, 8, 36);
-    }
+    for (let y = 0; y < 512; y += 64) ctxR.fillRect(252, y, 8, 36);
     this.registerTexture('asphalt_track.jpg', cRoad, 'image/jpeg', true);
 
-    // 2. Текстура бортиков
     const cBar = document.createElement('canvas');
     cBar.width = 256; cBar.height = 64;
     const ctxB = cBar.getContext('2d');
@@ -437,7 +1193,6 @@ class AssetVault {
     }
     this.registerTexture('barrier_stripes.png', cBar, 'image/png', true);
 
-    // 3. Текстура неоновой сетки пола (Cyber Grid)
     const cFloor = document.createElement('canvas');
     cFloor.width = 512; cFloor.height = 512;
     const ctxF = cFloor.getContext('2d');
@@ -445,7 +1200,7 @@ class AssetVault {
     ctxF.fillRect(0, 0, 512, 512);
     ctxF.strokeStyle = theme.gridColor;
     ctxF.lineWidth = 2;
-    ctxF.globalAlpha = 0.35;
+    ctxF.globalAlpha = 0.38;
     for (let i = 0; i <= 512; i += 64) {
       ctxF.beginPath(); ctxF.moveTo(i, 0); ctxF.lineTo(i, 512); ctxF.stroke();
       ctxF.beginPath(); ctxF.moveTo(0, i); ctxF.lineTo(512, i); ctxF.stroke();
@@ -453,7 +1208,6 @@ class AssetVault {
     ctxF.globalAlpha = 1.0;
     this.registerTexture('city_floor.jpg', cFloor, 'image/jpeg', true);
 
-    // 4. Панорамный фон неба (Sky Dome Texture) с ретро-солнцем и звездами
     const cSky = document.createElement('canvas');
     cSky.width = 1024; cSky.height = 512;
     const ctxSky = cSky.getContext('2d');
@@ -463,30 +1217,18 @@ class AssetVault {
     grad.addColorStop(1, theme.floorColor);
     ctxSky.fillStyle = grad;
     ctxSky.fillRect(0, 0, 1024, 512);
-
-    // Звезды
     ctxSky.fillStyle = '#ffffff';
-    for (let i = 0; i < 240; i++) {
-      const sx = Math.random() * 1024;
-      const sy = Math.random() * 280;
-      ctxSky.fillRect(sx, sy, 2, 2);
-    }
-    // Огромное киберпанк/синтвейв солнце на горизонте
+    for (let i = 0; i < 200; i++) ctxSky.fillRect(Math.random() * 1024, Math.random() * 260, 2, 2);
+
     const sunGrad = ctxSky.createLinearGradient(0, 180, 0, 340);
     sunGrad.addColorStop(0, '#ffe600');
-    sunGrad.addColorStop(1, '#ff007f');
+    sunGrad.addColorStop(1, theme.stripeA);
     ctxSky.fillStyle = sunGrad;
     ctxSky.beginPath();
     ctxSky.arc(512, 265, 75, 0, Math.PI * 2);
     ctxSky.fill();
-    // Полосы на ретро-солнце
-    ctxSky.fillStyle = theme.skyBottom;
-    for (let y = 260; y < 340; y += 12) {
-      ctxSky.fillRect(430, y, 164, 4);
-    }
     this.registerTexture('sky_panorama.jpg', cSky, 'image/jpeg', false);
 
-    // 5. Стартовая шахматная линия
     if (!this.textures['start_grid.png']) {
       const cStart = document.createElement('canvas');
       cStart.width = 256; cStart.height = 128;
@@ -514,167 +1256,367 @@ class AssetVault {
   exportAllToDisk() {
     Object.entries(this.dataURLs).forEach(([name, url]) => {
       const a = document.createElement('a');
-      a.href = url;
-      a.download = name;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      a.href = url; a.download = name;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
     });
   }
 }
 
 /**
  * ============================================================================
- * 3. ЗВУКОВОЙ СИНТЕЗАТОР (Web Audio API)
+ * 4. ЗВУКОВОЙ СИНТЕЗАТОР (Web Audio API)
  * ============================================================================
  */
 class SoundEngine {
   constructor() {
     this.ctx = null;
-    this.engineOsc = null;
-    this.engineGain = null;
     this.initialized = false;
   }
   init() {
     if (this.initialized) return;
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    if (!AudioCtx) return;
-    this.ctx = new AudioCtx();
-    this.engineOsc = this.ctx.createOscillator();
-    this.engineGain = this.ctx.createGain();
-    this.engineOsc.type = 'sawtooth';
-    this.engineOsc.frequency.value = 50;
-    this.engineGain.gain.value = 0.0001;
-
-    const filter = this.ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.value = 220;
-
-    this.engineOsc.connect(filter);
-    filter.connect(this.engineGain);
-    this.engineGain.connect(this.ctx.destination);
-    this.engineOsc.start();
-    this.initialized = true;
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      this.ctx = new AudioCtx();
+      this.engineOsc = this.ctx.createOscillator();
+      this.engineGain = this.ctx.createGain();
+      this.engineOsc.type = 'sawtooth';
+      this.engineOsc.frequency.value = 50;
+      this.engineGain.gain.value = 0.0001;
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 220;
+      this.engineOsc.connect(filter);
+      filter.connect(this.engineGain);
+      this.engineGain.connect(this.ctx.destination);
+      this.engineOsc.start();
+      this.initialized = true;
+    } catch (e) {}
   }
-  updateEngine(speedRatio, isDrifting, isBoosting) {
-    if (!this.initialized) return;
-    const freq = 48 + speedRatio * 115 + (isBoosting ? 35 : 0);
+  updateEngine(speedKmh, isDrifting, isBoosting) {
+    if (!this.initialized || !this.ctx) return;
+    const freq = 44 + (speedKmh / 150) * 135 + (isBoosting ? 35 : 0);
     this.engineOsc.frequency.setTargetAtTime(freq, this.ctx.currentTime, 0.06);
-    const vol = 0.025 + speedRatio * 0.04 + (isDrifting ? 0.015 : 0);
+    const vol = 0.025 + (speedKmh / 160) * 0.045 + (isDrifting ? 0.015 : 0);
     this.engineGain.gain.setTargetAtTime(vol, this.ctx.currentTime, 0.08);
   }
   muteEngine() {
-    if (this.initialized && this.engineGain) {
+    if (this.initialized && this.engineGain && this.ctx) {
       this.engineGain.gain.setTargetAtTime(0.0001, this.ctx.currentTime, 0.1);
     }
   }
   playTone(f1, f2, dur = 0.18, type = 'sine', vol = 0.11) {
-    if (!this.initialized) return;
-    const osc = this.ctx.createOscillator();
-    const g = this.ctx.createGain();
-    osc.type = type;
-    osc.frequency.setValueAtTime(f1, this.ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(Math.max(25, f2), this.ctx.currentTime + dur);
-    g.gain.setValueAtTime(vol, this.ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + dur);
-    osc.connect(g); g.connect(this.ctx.destination);
-    osc.start(); osc.stop(this.ctx.currentTime + dur);
+    if (!this.initialized || !this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(f1, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(Math.max(25, f2), this.ctx.currentTime + dur);
+      g.gain.setValueAtTime(vol, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + dur);
+      osc.connect(g); g.connect(this.ctx.destination);
+      osc.start(); osc.stop(this.ctx.currentTime + dur);
+    } catch (e) {}
   }
-  playBoost() { this.playTone(200, 680, 0.32, 'sawtooth', 0.12); }
-  playPickup() { this.playTone(500, 980, 0.18, 'triangle', 0.13); }
-  playHit() { this.playTone(130, 40, 0.16, 'square', 0.13); }
-  playBeep(high = false) { this.playTone(high ? 880 : 440, high ? 880 : 440, 0.15, 'sine', 0.11); }
+  playBoost()  { this.playTone(220, 720, 0.30, 'sawtooth', 0.12); }
+  playPickup() { this.playTone(520, 1040, 0.18, 'triangle', 0.13); }
+  playCoin()   { this.playTone(880, 1320, 0.12, 'sine', 0.11); }
+  playCrate()  { this.playTone(180, 520, 0.22, 'square', 0.14); }
+  playPortal() { this.playTone(300, 1400, 0.35, 'sine', 0.15); }
+  playHorn()   { this.playTone(440, 660, 0.25, 'sawtooth', 0.14); }
+  playHit()    { this.playTone(130, 42, 0.16, 'square', 0.13); }
+  playBeep(hi) { this.playTone(hi ? 880 : 440, hi ? 880 : 440, 0.15, 'sine', 0.11); }
 }
 
 /**
  * ============================================================================
- * 4. ГЕНЕРАТОР 4 ГОРОДОВ И 4 РАЗНЫХ КАРТ (src/track/TrackBuilder.ts)
- * Все сплайны выстроены строго в прямом направлении без разворота на старте!
+ * 5. ПУЛ 3D-ЧАСТИЦ, СНАРЯДОВ, МИН И ПОГОДНЫХ ЭФФЕКТОВ
  * ============================================================================
  */
-class TrackBuilder {
+class InteractiveFXManager {
+  constructor(scene) {
+    this.scene = scene;
+    this.particles = [];
+    this.projectiles = [];
+    this.mines = [];
+
+    // Пул частиц для взрывов ящиков и дрифта
+    const pGeo = new THREE.BoxGeometry(0.32, 0.32, 0.32);
+    for (let i = 0; i < 90; i++) {
+      const m = new THREE.Mesh(pGeo, new THREE.MeshBasicMaterial({ color: 0x00f3ff }));
+      m.visible = false;
+      scene.add(m);
+      this.particles.push({ mesh: m, vel: new THREE.Vector3(), life: 0 });
+    }
+
+    // Погодная система (Неоновый дождь / Снег)
+    const rainGeo = new THREE.BufferGeometry();
+    const rainPositions = [];
+    for (let i = 0; i < 650; i++) {
+      rainPositions.push((Math.random() - 0.5) * 260, Math.random() * 90, (Math.random() - 0.5) * 260);
+    }
+    rainGeo.setAttribute('position', new THREE.Float32BufferAttribute(rainPositions, 3));
+    this.weatherPoints = new THREE.Points(
+      rainGeo,
+      new THREE.PointsMaterial({ color: 0x00f3ff, size: 0.7, transparent: true, opacity: 0.75 })
+    );
+    this.weatherPoints.visible = false;
+    scene.add(this.weatherPoints);
+  }
+
+  burst(pos, colorHex, count = 10) {
+    let n = 0;
+    for (const p of this.particles) {
+      if (p.life <= 0) {
+        p.life = 0.4 + Math.random() * 0.35;
+        p.mesh.visible = true;
+        p.mesh.material.color.setHex(colorHex);
+        p.mesh.position.copy(pos);
+        p.vel.set((Math.random() - 0.5) * 22, 4 + Math.random() * 14, (Math.random() - 0.5) * 22);
+        if (++n >= count) break;
+      }
+    }
+  }
+
+  spawnPlasmaRocket(owner, pos, heading) {
+    const mesh = new THREE.Mesh(
+      new THREE.SphereGeometry(0.65, 12, 12),
+      new THREE.MeshBasicMaterial({ color: 0x00ff66 })
+    );
+    mesh.position.copy(pos).add(new THREE.Vector3(0, 1.0, 0));
+    this.scene.add(mesh);
+    const dir = new THREE.Vector3(Math.sin(heading), 0, Math.cos(heading));
+    this.projectiles.push({ owner, mesh, dir, speed: 92, life: 3.0 });
+  }
+
+  dropMine(owner, pos) {
+    const mesh = new THREE.Mesh(
+      new THREE.CylinderGeometry(1.1, 1.3, 0.45, 16),
+      new THREE.MeshBasicMaterial({ color: 0xff0055 })
+    );
+    mesh.position.copy(pos).add(new THREE.Vector3(0, 0.25, 0));
+    this.scene.add(mesh);
+    this.mines.push({ owner, mesh, life: 18.0 });
+  }
+
+  clearAllWeapons() {
+    this.projectiles.forEach(p => this.scene.remove(p.mesh));
+    this.mines.forEach(m => this.scene.remove(m.mesh));
+    this.projectiles = [];
+    this.mines = [];
+  }
+
+  update(dt, karts, sound, onPlayerHitTarget) {
+    // Частицы
+    for (const p of this.particles) {
+      if (p.life > 0) {
+        p.life -= dt;
+        p.mesh.position.addScaledVector(p.vel, dt);
+        p.vel.y -= 24 * dt;
+        if (p.life <= 0) p.mesh.visible = false;
+      }
+    }
+
+    // Погода
+    if (this.weatherPoints.visible) {
+      const posAttr = this.weatherPoints.geometry.attributes.position;
+      for (let i = 0; i < posAttr.count; i++) {
+        let y = posAttr.getY(i) - 42 * dt;
+        if (y < 0) y = 90;
+        posAttr.setY(i, y);
+      }
+      posAttr.needsUpdate = true;
+    }
+
+    // Полет 3D-ракет
+    for (let i = this.projectiles.length - 1; i >= 0; i--) {
+      const proj = this.projectiles[i];
+      proj.life -= dt;
+      proj.mesh.position.addScaledVector(proj.dir, proj.speed * dt);
+
+      let hit = false;
+      for (const k of karts) {
+        if (k !== proj.owner && k.position.distanceTo(proj.mesh.position) < 3.2) {
+          if (k.shieldTimer <= 0) {
+            k.spinOutTimer = 1.1;
+            k.speed *= 0.35;
+          }
+          this.burst(k.position, 0x00ff66, 14);
+          if (sound) sound.playHit();
+          if (!proj.owner.isAI && onPlayerHitTarget) onPlayerHitTarget();
+          hit = true;
+          break;
+        }
+      }
+      if (hit || proj.life <= 0) {
+        this.scene.remove(proj.mesh);
+        this.projectiles.splice(i, 1);
+      }
+    }
+
+    // Проверка наезда на мины
+    for (let i = this.mines.length - 1; i >= 0; i--) {
+      const mine = this.mines[i];
+      mine.life -= dt;
+      mine.mesh.rotation.y += 4 * dt;
+      let triggered = false;
+      for (const k of karts) {
+        if (k !== mine.owner && k.position.distanceTo(mine.mesh.position) < 2.6) {
+          if (k.shieldTimer <= 0) {
+            k.spinOutTimer = 1.15;
+            k.speed *= 0.3;
+          }
+          this.burst(mine.mesh.position, 0xff0055, 16);
+          if (sound) sound.playHit();
+          triggered = true;
+          break;
+        }
+      }
+      if (triggered || mine.life <= 0) {
+        this.scene.remove(mine.mesh);
+        this.mines.splice(i, 1);
+      }
+    }
+  }
+}
+
+/**
+ * ============================================================================
+ * 6. СТРОИТЕЛЬ 12 ТРАСС И МИНИ-ГОРОДА С БОГАТЫМ ИНТЕРАКТИВОМ
+ * (Разрушаемые ящики, движущиеся лазеры, телепорт-порталы, маяки)
+ * ============================================================================
+ */
+class WorldBuilder {
   constructor(scene, assets) {
     this.scene = scene;
     this.assets = assets;
-    this.trackGroup = new THREE.Group();
-    this.scene.add(this.trackGroup);
+    this.worldGroup = new THREE.Group();
+    this.scene.add(this.worldGroup);
 
+    this.mode = 'race';
     this.curve = null;
     this.samples = [];
-    this.trackWidth = 15.0; // Широкая комфортная трасса
+    this.trackWidth = 16.0;
+
     this.boostPads = [];
     this.itemBoxes = [];
+    this.coins = [];
+    this.ramps = [];
+    this.crates = [];       // Разрушаемые кибер-ящики
+    this.laserGates = [];   // Движущиеся лазерные преграды
+    this.portals = [];      // Телепорт-кольца
+    this.beacons = [];      // Интерактивные маяки в Мини-Городе
+    this.cityBuildings = [];
   }
 
-  build(trackIndex = 0) {
-    while (this.trackGroup.children.length > 0) {
-      this.trackGroup.remove(this.trackGroup.children[0]);
+  build(mode, trackIndex) {
+    this.mode = mode;
+    while (this.worldGroup.children.length > 0) {
+      this.worldGroup.remove(this.worldGroup.children[0]);
     }
     this.boostPads = [];
     this.itemBoxes = [];
+    this.coins = [];
+    this.ramps = [];
+    this.crates = [];
+    this.laserGates = [];
+    this.portals = [];
+    this.beacons = [];
+    this.cityBuildings = [];
 
     this.assets.buildThemeAssets(trackIndex);
-    const theme = CITY_THEMES[trackIndex];
+    const theme = TRACK_CATALOG[trackIndex] || TRACK_CATALOG[0];
     this.scene.fog.color.setHex(theme.fogColor);
 
-    // 1. Небесный купол (Sky Dome) и пол города
-    this.buildSkyAndCityScenery(trackIndex);
+    const skyDome = new THREE.Mesh(
+      new THREE.SphereGeometry(460, 32, 20),
+      new THREE.MeshBasicMaterial({ map: this.assets.textures['sky_panorama.jpg'], side: THREE.BackSide, fog: false })
+    );
+    this.worldGroup.add(skyDome);
 
-    // 2. Точки 4 разных трасс.
-    // ВАЖНО: pts[0] и pts[1] всегда образуют прямой стартовый участок вперед (вдоль +X),
-    // а последняя точка плавно заходит сзади в pts[0], поэтому болиды ВСЕГДА смотрят строго вперед по трассе!
-    let pts = [];
-    if (trackIndex === 0) {
-      // КАРТА 1: Neo-Tokyo Desk GP (Эстакада над RGB-клавиатурой)
-      pts = [
-        new THREE.Vector3(-25, 2.5, 78),  // Старт: движение строго вперед к +X
-        new THREE.Vector3(35, 2.5, 78),
-        new THREE.Vector3(88, 6.0, 50),
-        new THREE.Vector3(92, 14.0, -5),
-        new THREE.Vector3(35, 17.5, -25), // Пролет над клавиатурой
-        new THREE.Vector3(-25, 14.0, -10),
-        new THREE.Vector3(-75, 8.0, -45),
-        new THREE.Vector3(-105, 5.0, 0),
-        new THREE.Vector3(-85, 3.0, 58)
-      ];
-    } else if (trackIndex === 1) {
-      // КАРТА 2: Synthwave Miami Bay (Широкие плавные пляжные дуги и пальмовая аллея)
-      pts = [
-        new THREE.Vector3(-30, 2.5, 82),
-        new THREE.Vector3(45, 2.5, 82),
-        new THREE.Vector3(105, 5.0, 35),
-        new THREE.Vector3(95, 10.0, -45),
-        new THREE.Vector3(25, 6.0, -75),
-        new THREE.Vector3(-45, 11.0, -55),
-        new THREE.Vector3(-105, 6.0, -5),
-        new THREE.Vector3(-88, 3.0, 62)
-      ];
-    } else if (trackIndex === 2) {
-      // КАРТА 3: Cyber-Moscow 2099 (Двухуровневые высотные мосты среди голограмм)
-      pts = [
-        new THREE.Vector3(-25, 3.0, 80),
-        new THREE.Vector3(40, 3.0, 80),
-        new THREE.Vector3(98, 9.0, 42),
-        new THREE.Vector3(70, 18.0, -18),
-        new THREE.Vector3(95, 12.0, -70),
-        new THREE.Vector3(0, 20.0, -82),
-        new THREE.Vector3(-90, 12.0, -50),
-        new THREE.Vector3(-60, 6.0, 10),
-        new THREE.Vector3(-92, 3.5, 60)
-      ];
+    const floorTex = this.assets.textures['city_floor.jpg'];
+    floorTex.repeat.set(32, 32);
+    const floor = new THREE.Mesh(
+      new THREE.PlaneGeometry(800, 800),
+      new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.6, metalness: 0.2 })
+    );
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = -0.15;
+    this.worldGroup.add(floor);
+
+    if (mode === 'freeroam') {
+      this.buildOpenMiniCity();
     } else {
-      // КАРТА 4: Orbital Sector-7 (Космический гипер-трек с высокими виражами)
-      pts = [
-        new THREE.Vector3(-30, 4.0, 85),
-        new THREE.Vector3(45, 4.0, 85),
-        new THREE.Vector3(112, 12.0, 25),
-        new THREE.Vector3(75, 22.0, -60),
-        new THREE.Vector3(0, 10.0, -25),
-        new THREE.Vector3(-75, 22.0, -60),
-        new THREE.Vector3(-112, 12.0, 25),
-        new THREE.Vector3(-85, 4.5, 72)
-      ];
+      this.buildRaceTrack(trackIndex);
     }
+  }
+
+  buildOpenMiniCity() {
+    const roadMat = new THREE.MeshStandardMaterial({ map: this.assets.textures['asphalt_track.jpg'], roughness: 0.45 });
+    for (let offset of [-75, 0, 75]) {
+      const roadEW = new THREE.Mesh(new THREE.PlaneGeometry(320, 22), roadMat);
+      roadEW.rotation.x = -Math.PI / 2;
+      roadEW.position.set(0, 0.05, offset);
+      this.worldGroup.add(roadEW);
+
+      const roadNS = new THREE.Mesh(new THREE.PlaneGeometry(22, 320), roadMat);
+      roadNS.rotation.x = -Math.PI / 2;
+      roadNS.position.set(offset, 0.06, 0);
+      this.worldGroup.add(roadNS);
+    }
+
+    const blockCoords = [-115, -40, 40, 115];
+    const colors = [0x00f3ff, 0xff007f, 0xffe600, 0x00ff66];
+    let cIdx = 0;
+    for (let bx of blockCoords) {
+      for (let bz of blockCoords) {
+        if (Math.abs(bx) < 25 && Math.abs(bz) < 25) continue;
+        const w = 26, d = 26, h = 24 + ((Math.abs(bx + bz)) % 45);
+        const bMat = new THREE.MeshStandardMaterial({
+          color: 0x101424,
+          roughness: 0.3,
+          emissive: colors[cIdx++ % colors.length],
+          emissiveIntensity: 0.28
+        });
+        const bMesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), bMat);
+        bMesh.position.set(bx, h * 0.5, bz);
+        this.worldGroup.add(bMesh);
+        this.cityBuildings.push({ x: bx, z: bz, halfW: w * 0.5 + 1.4, halfD: d * 0.5 + 1.4 });
+      }
+    }
+
+    // Трамплины в городе
+    [[0, 35, 0], [0, -35, Math.PI], [35, 0, Math.PI / 2], [-35, 0, -Math.PI / 2], [75, 35, 0], [-75, -35, Math.PI]]
+      .forEach(([rx, rz, rot]) => this.addRamp(new THREE.Vector3(rx, 0, rz), rot));
+
+    // Голографические маяки захвата (City Beacons)
+    [[-75, -75], [75, -75], [75, 75], [-75, 75], [0, 0]].forEach(([bx, bz]) => {
+      const ring = new THREE.Mesh(
+        new THREE.CylinderGeometry(4.5, 4.5, 14, 16, 1, true),
+        new THREE.MeshBasicMaterial({ color: 0x00ff66, wireframe: true, side: THREE.DoubleSide })
+      );
+      ring.position.set(bx, 7, bz);
+      this.worldGroup.add(ring);
+      this.beacons.push({ mesh: ring, position: new THREE.Vector3(bx, 0, bz), cooldown: 0 });
+    });
+
+    // Разрушаемые кибер-ящики на перекрестках
+    for (let x = -90; x <= 90; x += 30) {
+      this.addCrate(new THREE.Vector3(x, 1.1, 75));
+      this.addCrate(new THREE.Vector3(75, 1.1, x));
+    }
+
+    for (let i = 0; i < 40; i++) {
+      const angle = (i / 40) * Math.PI * 2;
+      const rad = (i % 2 === 0) ? 75 : 38;
+      this.addCoin(new THREE.Vector3(Math.cos(angle) * rad, 1.4, Math.sin(angle) * rad));
+    }
+  }
+
+  buildRaceTrack(trackIndex) {
+    const theme = TRACK_CATALOG[trackIndex] || TRACK_CATALOG[0];
+    const pts = theme.pts.map(([x, y, z]) => new THREE.Vector3(x, y, z));
 
     this.curve = new THREE.CatmullRomCurve3(pts, true, 'catmullrom', 0.5);
     const segments = 440;
@@ -689,141 +1631,6 @@ class TrackBuilder {
       this.samples.push({ u, point, tangent, right });
     }
 
-    this.buildRoadAndBarriers(segments);
-    this.buildSupports(segments);
-    this.placeTrackItems();
-  }
-
-  buildSkyAndCityScenery(trackIndex) {
-    // Панорамная сфера неба
-    const skyGeo = new THREE.SphereGeometry(420, 32, 20);
-    const skyMat = new THREE.MeshBasicMaterial({
-      map: this.assets.textures['sky_panorama.jpg'],
-      side: THREE.BackSide,
-      fog: false
-    });
-    const skyDome = new THREE.Mesh(skyGeo, skyMat);
-    this.trackGroup.add(skyDome);
-
-    // Пол с неоновой сеткой
-    const floorTex = this.assets.textures['city_floor.jpg'];
-    floorTex.repeat.set(28, 28);
-    const floorMat = new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.6, metalness: 0.2 });
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(700, 700), floorMat);
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.y = -0.2;
-    floor.receiveShadow = true;
-    this.trackGroup.add(floor);
-
-    if (trackIndex === 0) {
-      // Neo-Tokyo: Геймерская RGB-клавиатура в центре + кибер-небоскребы вокруг стола
-      this.buildRGBKeyboard(new THREE.Vector3(5, 0, 10));
-      this.buildNeonSkyscrapers(0x00f3ff, 0xff007f, 28);
-    } else if (trackIndex === 1) {
-      // Synthwave Miami: Неоновые пальмы и ретро-пирамиды
-      this.buildSynthPalms(34);
-      this.buildNeonSkyscrapers(0xff007f, 0xffe600, 18);
-    } else if (trackIndex === 2) {
-      // Cyber-Moscow: Высотные голографические шпили и башни
-      this.buildMoscowTowers();
-      this.buildNeonSkyscrapers(0xff2a4b, 0x00ff88, 32);
-    } else {
-      // Orbital Station: Кольца космического реактора и астероиды
-      this.buildOrbitalRings();
-    }
-  }
-
-  buildRGBKeyboard(pos) {
-    const kbGroup = new THREE.Group();
-    kbGroup.position.copy(pos);
-    kbGroup.rotation.y = -0.22;
-
-    const base = new THREE.Mesh(
-      new THREE.BoxGeometry(110, 3.2, 44),
-      new THREE.MeshStandardMaterial({ color: 0x12131c, roughness: 0.3, metalness: 0.6 })
-    );
-    base.position.y = 1.6;
-    kbGroup.add(base);
-
-    const glow = new THREE.Mesh(
-      new THREE.PlaneGeometry(104, 38),
-      new THREE.MeshBasicMaterial({ color: 0x00f3ff })
-    );
-    glow.rotation.x = -Math.PI / 2;
-    glow.position.y = 3.25;
-    kbGroup.add(glow);
-
-    const rows = 5, cols = 16;
-    const keyGeo = new THREE.BoxGeometry(4.8, 2.0, 4.8);
-    const keyMat = new THREE.MeshStandardMaterial({ color: 0x191c26, emissive: 0x005577, emissiveIntensity: 0.4 });
-    const inst = new THREE.InstancedMesh(keyGeo, keyMat, rows * cols);
-    const dummy = new THREE.Object3D();
-    let idx = 0;
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        dummy.position.set(-45 + c * 6.0, 4.0, -13 + r * 6.5);
-        dummy.updateMatrix();
-        inst.setMatrixAt(idx++, dummy.matrix);
-      }
-    }
-    kbGroup.add(inst);
-    this.trackGroup.add(kbGroup);
-  }
-
-  buildNeonSkyscrapers(color1, color2, count) {
-    for (let i = 0; i < count; i++) {
-      const angle = (i / count) * Math.PI * 2;
-      const radius = 145 + (i % 3) * 35;
-      const h = 35 + (i * 17) % 65;
-      const w = 14 + (i % 4) * 4;
-      const bMat = new THREE.MeshStandardMaterial({
-        color: 0x0b0d18,
-        roughness: 0.3,
-        emissive: i % 2 === 0 ? color1 : color2,
-        emissiveIntensity: 0.22
-      });
-      const tower = new THREE.Mesh(new THREE.BoxGeometry(w, h, w), bMat);
-      tower.position.set(Math.cos(angle) * radius, h * 0.5, Math.sin(angle) * radius);
-      this.trackGroup.add(tower);
-    }
-  }
-
-  buildSynthPalms(count) {
-    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x2b0f4c, emissive: 0xff007f, emissiveIntensity: 0.25 });
-    const leafMat = new THREE.MeshBasicMaterial({ color: 0x00f3ff, wireframe: true });
-    for (let i = 0; i < count; i++) {
-      const angle = (i / count) * Math.PI * 2;
-      const r = (i % 2 === 0) ? 45 : 128;
-      const g = new THREE.Group();
-      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 1.3, 16, 8), trunkMat);
-      trunk.position.y = 8;
-      const crown = new THREE.Mesh(new THREE.ConeGeometry(6.5, 4, 6), leafMat);
-      crown.position.y = 16.5;
-      g.add(trunk, crown);
-      g.position.set(Math.cos(angle) * r, 0, Math.sin(angle) * r);
-      this.trackGroup.add(g);
-    }
-  }
-
-  buildMoscowTowers() {
-    // Центральный голографический мега-шпиль
-    const spireMat = new THREE.MeshStandardMaterial({ color: 0x102030, emissive: 0x00f3ff, emissiveIntensity: 0.45, wireframe: true });
-    const spire = new THREE.Mesh(new THREE.ConeGeometry(22, 95, 8), spireMat);
-    spire.position.set(0, 47.5, -10);
-    this.trackGroup.add(spire);
-  }
-
-  buildOrbitalRings() {
-    const ringMat = new THREE.MeshBasicMaterial({ color: 0x00f3ff, wireframe: true });
-    for (let i = 0; i < 3; i++) {
-      const ring = new THREE.Mesh(new THREE.TorusGeometry(65 + i * 28, 1.4, 8, 48), ringMat);
-      ring.position.set(0, 15, 0);
-      ring.rotation.x = Math.PI / 3 + i * 0.4;
-      this.trackGroup.add(ring);
-    }
-  }
-
-  buildRoadAndBarriers(segments) {
     const halfW = this.trackWidth * 0.5;
     const roadPos = [], roadUV = [], roadIdx = [];
     const barPos = [], barUV = [], barIdx = [];
@@ -859,23 +1666,32 @@ class TrackBuilder {
     rGeo.setAttribute('uv', new THREE.Float32BufferAttribute(roadUV, 2));
     rGeo.setIndex(roadIdx);
     rGeo.computeVertexNormals();
-    const rMesh = new THREE.Mesh(rGeo, new THREE.MeshStandardMaterial({
+    this.worldGroup.add(new THREE.Mesh(rGeo, new THREE.MeshStandardMaterial({
       map: this.assets.textures['asphalt_track.jpg'], roughness: 0.45, metalness: 0.15, side: THREE.DoubleSide
-    }));
-    rMesh.receiveShadow = true;
-    this.trackGroup.add(rMesh);
+    })));
 
     const bGeo = new THREE.BufferGeometry();
     bGeo.setAttribute('position', new THREE.Float32BufferAttribute(barPos, 3));
     bGeo.setAttribute('uv', new THREE.Float32BufferAttribute(barUV, 2));
     bGeo.setIndex(barIdx);
     bGeo.computeVertexNormals();
-    const bMesh = new THREE.Mesh(bGeo, new THREE.MeshStandardMaterial({
+    this.worldGroup.add(new THREE.Mesh(bGeo, new THREE.MeshStandardMaterial({
       map: this.assets.textures['barrier_stripes.png'], roughness: 0.3, side: THREE.DoubleSide
-    }));
-    this.trackGroup.add(bMesh);
+    })));
 
-    // Стартовая черта и неоновые ворота старта (показывают направление вперед!)
+    // Металлические опоры под эстакадами
+    const pillarMat = new THREE.MeshStandardMaterial({ color: 0x4a5568, metalness: 0.6, roughness: 0.3 });
+    for (let i = 0; i < segments; i += 20) {
+      const s = this.samples[i];
+      if (s.point.y > 3.2) {
+        const h = s.point.y;
+        const pillar = new THREE.Mesh(new THREE.BoxGeometry(1.3, h, 1.3), pillarMat);
+        pillar.position.set(s.point.x, h * 0.5, s.point.z);
+        this.worldGroup.add(pillar);
+      }
+    }
+
+    // Стартовая черта
     const s0 = this.samples[0];
     const startLine = new THREE.Mesh(
       new THREE.PlaneGeometry(this.trackWidth - 0.6, 4.5),
@@ -885,39 +1701,12 @@ class TrackBuilder {
     const yaw = Math.atan2(s0.tangent.x, s0.tangent.z);
     startLine.rotation.x = -Math.PI / 2;
     startLine.rotation.z = yaw;
-    this.trackGroup.add(startLine);
+    this.worldGroup.add(startLine);
 
-    // Неоновая П-образная стартовая арка над дорогой
-    const archGroup = new THREE.Group();
-    archGroup.position.copy(s0.point);
-    archGroup.rotation.y = yaw;
-    const archMat = new THREE.MeshBasicMaterial({ color: 0x00f3ff });
-    const pL = new THREE.Mesh(new THREE.BoxGeometry(0.7, 8, 0.7), archMat);
-    pL.position.set(-halfW, 4, 0);
-    const pR = pL.clone();
-    pR.position.x = halfW;
-    const topBar = new THREE.Mesh(new THREE.BoxGeometry(this.trackWidth + 1.4, 1.2, 1.0), new THREE.MeshBasicMaterial({ color: 0xff007f }));
-    topBar.position.set(0, 8.2, 0);
-    archGroup.add(pL, pR, topBar);
-    this.trackGroup.add(archGroup);
-  }
+    this.buildTrackProps(theme.propType);
 
-  buildSupports(segments) {
-    const mat = new THREE.MeshStandardMaterial({ color: 0x4a5568, metalness: 0.7, roughness: 0.3 });
-    for (let i = 0; i < segments; i += 20) {
-      const s = this.samples[i];
-      if (s.point.y > 3.2) {
-        const h = s.point.y;
-        const pillar = new THREE.Mesh(new THREE.BoxGeometry(1.2, h, 1.2), mat);
-        pillar.position.set(s.point.x, h * 0.5, s.point.z);
-        this.trackGroup.add(pillar);
-      }
-    }
-  }
-
-  placeTrackItems() {
-    const boostLocs = [0.14, 0.36, 0.58, 0.80];
-    boostLocs.forEach(u => {
+    // 1. Ускорители
+    [0.12, 0.34, 0.56, 0.78].forEach(u => {
       const s = this.getSampleAtU(u);
       const pad = new THREE.Mesh(
         new THREE.PlaneGeometry(5.0, 6.5),
@@ -926,23 +1715,140 @@ class TrackBuilder {
       pad.position.copy(s.point).add(new THREE.Vector3(0, 0.14, 0));
       pad.rotation.x = -Math.PI / 2;
       pad.rotation.z = Math.atan2(s.tangent.x, s.tangent.z);
-      this.trackGroup.add(pad);
-      this.boostPads.push({ u, position: s.point.clone(), radius: 4.6 });
+      this.worldGroup.add(pad);
+      this.boostPads.push({ position: s.point.clone(), radius: 4.6 });
     });
 
-    const itemLocs = [0.24, 0.48, 0.70];
+    // 2. Трамплины
+    [0.08, 0.42, 0.72].forEach(u => {
+      const s = this.getSampleAtU(u);
+      this.addRamp(s.point.clone(), Math.atan2(s.tangent.x, s.tangent.z));
+    });
+
+    // 3. Бонус-кубы (с новыми видами оружия)
     const boxGeo = new THREE.OctahedronGeometry(1.3, 0);
     const boxMat = new THREE.MeshStandardMaterial({ color: 0xffe600, emissive: 0xff007f, emissiveIntensity: 0.7 });
-    itemLocs.forEach(u => {
+    [0.20, 0.48, 0.76].forEach(u => {
       const s = this.getSampleAtU(u);
-      [-3.5, 0, 3.5].forEach(offset => {
+      [-3.6, 0, 3.6].forEach(offset => {
         const pos = s.point.clone().addScaledVector(s.right, offset).add(new THREE.Vector3(0, 1.6, 0));
         const mesh = new THREE.Mesh(boxGeo, boxMat);
         mesh.position.copy(pos);
-        this.trackGroup.add(mesh);
+        this.worldGroup.add(mesh);
         this.itemBoxes.push({ mesh, position: pos, active: true, cooldown: 0 });
       });
     });
+
+    // 4. НОВЫЙ ИНТЕРАКТИВ: Разрушаемые кибер-ящики (Destructible Crates)
+    [0.16, 0.28, 0.40, 0.62, 0.85, 0.92].forEach((u, idx) => {
+      const s = this.getSampleAtU(u);
+      const side = (idx % 2 === 0) ? -2.8 : 2.8;
+      this.addCrate(s.point.clone().addScaledVector(s.right, side).add(new THREE.Vector3(0, 1.0, 0)));
+    });
+
+    // 5. НОВЫЙ ИНТЕРАКТИВ: Движущиеся лазерные ворота (Moving Laser Gates)
+    [0.31, 0.66].forEach((u, idx) => {
+      const s = this.getSampleAtU(u);
+      const pylonGeo = new THREE.CylinderGeometry(0.65, 0.65, 5.5, 12);
+      const pylonMat = new THREE.MeshBasicMaterial({ color: 0xff0055 });
+      const mesh = new THREE.Mesh(pylonGeo, pylonMat);
+      mesh.position.copy(s.point).add(new THREE.Vector3(0, 2.75, 0));
+      this.worldGroup.add(mesh);
+      this.laserGates.push({
+        mesh,
+        basePoint: s.point.clone(),
+        rightVec: s.right.clone(),
+        phase: idx * 2.1
+      });
+    });
+
+    // 6. НОВЫЙ ИНТЕРАКТИВ: Кольца Телепорта (Warp Portals — перебрасывают вперед по трассе!)
+    [0.52].forEach(u => {
+      const s = this.getSampleAtU(u);
+      const portalMesh = new THREE.Mesh(
+        new THREE.TorusGeometry(2.6, 0.32, 12, 28),
+        new THREE.MeshBasicMaterial({ color: 0x00f3ff })
+      );
+      const pos = s.point.clone().addScaledVector(s.right, 3.8).add(new THREE.Vector3(0, 2.4, 0));
+      portalMesh.position.copy(pos);
+      portalMesh.rotation.y = Math.atan2(s.tangent.x, s.tangent.z);
+      this.worldGroup.add(portalMesh);
+      this.portals.push({ mesh: portalMesh, position: pos, targetU: (u + 0.055) % 1, cooldown: 0 });
+    });
+
+    // 7. Монеты
+    for (let u = 0.05; u < 0.95; u += 0.035) {
+      const s = this.getSampleAtU(u);
+      const side = Math.sin(u * Math.PI * 8) * 3.5;
+      this.addCoin(s.point.clone().addScaledVector(s.right, side).add(new THREE.Vector3(0, 1.2, 0)));
+    }
+  }
+
+  addCrate(pos) {
+    const geo = new THREE.BoxGeometry(1.85, 1.85, 1.85);
+    const mat = new THREE.MeshStandardMaterial({ color: 0xff007f, emissive: 0x00f3ff, emissiveIntensity: 0.45, wireframe: false });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.copy(pos);
+    this.worldGroup.add(mesh);
+    this.crates.push({ mesh, position: pos, active: true, cooldown: 0 });
+  }
+
+  addRamp(pos, yaw) {
+    const rampGroup = new THREE.Group();
+    rampGroup.position.copy(pos);
+    rampGroup.rotation.y = yaw;
+    const mesh = new THREE.Mesh(
+      new THREE.BoxGeometry(5.2, 0.9, 6.0),
+      new THREE.MeshStandardMaterial({ color: 0xff007f, emissive: 0x00f3ff, emissiveIntensity: 0.35 })
+    );
+    mesh.rotation.x = -0.22;
+    mesh.position.y = 0.45;
+    rampGroup.add(mesh);
+    this.worldGroup.add(rampGroup);
+    this.ramps.push({ position: pos.clone(), radius: 4.2 });
+  }
+
+  addCoin(pos) {
+    const geo = new THREE.CylinderGeometry(0.85, 0.85, 0.25, 16);
+    geo.rotateZ(Math.PI / 2);
+    const mat = new THREE.MeshStandardMaterial({ color: 0xffe600, emissive: 0xffaa00, emissiveIntensity: 0.6, metalness: 0.8, roughness: 0.2 });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.copy(pos);
+    this.worldGroup.add(mesh);
+    this.coins.push({ mesh, position: pos, active: true, cooldown: 0 });
+  }
+
+  buildTrackProps(propType) {
+    if (propType === 'keyboard' || propType === 'chips') {
+      const kbGroup = new THREE.Group();
+      kbGroup.position.set(5, 0, 8);
+      kbGroup.rotation.y = -0.22;
+      const base = new THREE.Mesh(
+        new THREE.BoxGeometry(108, 3.0, 42),
+        new THREE.MeshStandardMaterial({ color: 0x12131c, roughness: 0.3, metalness: 0.6 })
+      );
+      base.position.y = 1.5;
+      const glow = new THREE.Mesh(
+        new THREE.PlaneGeometry(102, 36),
+        new THREE.MeshBasicMaterial({ color: propType === 'chips' ? 0x00ff66 : 0x00f3ff })
+      );
+      glow.rotation.x = -Math.PI / 2;
+      glow.position.y = 3.05;
+      kbGroup.add(base, glow);
+      this.worldGroup.add(kbGroup);
+    }
+
+    for (let i = 0; i < 20; i++) {
+      const a = (i / 20) * Math.PI * 2;
+      const r = 152 + (i % 3) * 28;
+      const h = 32 + (i * 17) % 58;
+      const b = new THREE.Mesh(
+        new THREE.BoxGeometry(15, h, 15),
+        new THREE.MeshStandardMaterial({ color: 0x0c0e1a, emissive: i % 2 === 0 ? 0x00f3ff : 0xff007f, emissiveIntensity: 0.22 })
+      );
+      b.position.set(Math.cos(a) * r, h * 0.5, Math.sin(a) * r);
+      this.worldGroup.add(b);
+    }
   }
 
   getSampleAtU(u) {
@@ -952,14 +1858,11 @@ class TrackBuilder {
   }
 
   getClosestTrackInfo(worldPos, hintU = null) {
-    let bestIdx = 0;
-    let bestDistSq = Infinity;
+    let bestIdx = 0, bestDistSq = Infinity;
     const len = this.samples.length;
-
     if (hintU !== null) {
       const centerIdx = Math.floor((((hintU % 1) + 1) % 1) * (len - 1));
-      const win = 38;
-      for (let d = -win; d <= win; d++) {
+      for (let d = -38; d <= 38; d++) {
         const i = (centerIdx + d + len) % len;
         const p = this.samples[i].point;
         const dSq = (p.x - worldPos.x) ** 2 + (p.z - worldPos.z) ** 2;
@@ -980,7 +1883,7 @@ class TrackBuilder {
 
 /**
  * ============================================================================
- * 5. КЛАСС БОЛИДА: 4 РАЗНЫЕ 3D-МОДЕЛИ И МЯГКАЯ УПРАВЛЯЕМАЯ ФИЗИКА
+ * 7. КЛАСС БОЛИДА С 3D-ЩИТОМ, РАКЕТАМИ, МИНАМИ И ПОРТАЛАМИ
  * ============================================================================
  */
 class KartVehicle {
@@ -990,15 +1893,26 @@ class KartVehicle {
     this.style = config.style || 'kart';
     this.isAI = !!config.isAI;
     this.color = config.color || 0xff1e38;
+    this.neon = config.neon || 0x00f3ff;
+
     this.maxSpeed = config.maxSpeed;
     this.accel = config.accel;
     this.handling = config.handling;
-    this.aiSkill = config.aiSkill || 0.85;
+
+    this.aiSkill = config.aiSkill || 0.80;
+    this.aiSteerSharpness = config.aiSteerSharpness || 2.2;
+    this.aiWander = config.aiWander || 5.0;
+    this.aiItemChance = config.aiItemChance || 0.5;
+    this.aiTargetOffset = (Math.random() - 0.5) * this.aiWander;
 
     this.position = new THREE.Vector3();
     this.heading = 0;
     this.speed = 0;
-    this.steerInputSmooth = 0; // Плавный руль без резких рывков!
+    this.vy = 0;
+    this.airHeight = 0;
+    this.trickSpin = 0;
+    this.steerSmooth = 0;
+
     this.u = 0;
     this.lap = 1;
     this.totalProgress = 0;
@@ -1008,90 +1922,95 @@ class KartVehicle {
     this.driftDir = 0;
     this.driftCharge = 0;
     this.boostTimer = 0;
+    this.shieldTimer = 0;
     this.heldItem = null;
     this.spinOutTimer = 0;
-    this.aiTargetOffset = (Math.random() - 0.5) * 6.0;
 
-    this.mesh = this.buildModelByStyle(this.style, this.color);
+    this.mesh = this.buildChassis(this.style, this.color, this.neon);
     this.scene.add(this.mesh);
   }
 
-  buildModelByStyle(style, bodyColor) {
+  buildChassis(style, bodyColor, neonColor) {
     const root = new THREE.Group();
     this.visualGroup = new THREE.Group();
     root.add(this.visualGroup);
 
-    const bodyMat = new THREE.MeshStandardMaterial({ color: bodyColor, roughness: 0.25, metalness: 0.3 });
-    const accentMat = new THREE.MeshStandardMaterial({ color: 0xffe600, roughness: 0.3 });
-    const darkMat = new THREE.MeshStandardMaterial({ color: 0x181a24, roughness: 0.5, metalness: 0.5 });
-    const neonMat = new THREE.MeshBasicMaterial({ color: 0x00f3ff });
+    const bodyMat = new THREE.MeshStandardMaterial({ color: bodyColor, roughness: 0.22, metalness: 0.35 });
+    const neonMat = new THREE.MeshBasicMaterial({ color: neonColor });
+    const darkMat = new THREE.MeshStandardMaterial({ color: 0x161822, roughness: 0.5, metalness: 0.5 });
+
+    const underglow = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 3.8), neonMat);
+    underglow.rotation.x = -Math.PI / 2;
+    underglow.position.y = 0.08;
+    this.visualGroup.add(underglow);
+
+    // 3D-сфера Кибер-Щита (активируется бонусом)
+    this.shieldMesh = new THREE.Mesh(
+      new THREE.SphereGeometry(2.35, 16, 12),
+      new THREE.MeshBasicMaterial({ color: 0x00f3ff, wireframe: true, transparent: true, opacity: 0.55 })
+    );
+    this.shieldMesh.position.y = 1.0;
+    this.shieldMesh.visible = false;
+    this.visualGroup.add(this.shieldMesh);
 
     if (style === 'truck') {
-      // 1. КИБЕР-ТРАК: граненый бронекорпус с неоновой балкой
-      const hull = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.95, 4.0), bodyMat);
+      const hull = new THREE.Mesh(new THREE.BoxGeometry(2.55, 0.95, 4.1), bodyMat);
       hull.position.y = 0.75;
-      const cabin = new THREE.Mesh(new THREE.ConeGeometry(1.5, 1.1, 4), darkMat);
-      cabin.rotation.y = Math.PI / 4;
-      cabin.position.set(0, 1.45, -0.1);
-      const lightBar = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.14, 0.15), neonMat);
-      lightBar.position.set(0, 1.1, 2.01);
-      this.visualGroup.add(hull, cabin, lightBar);
+      const roof = new THREE.Mesh(new THREE.ConeGeometry(1.55, 1.1, 4), darkMat);
+      roof.rotation.y = Math.PI / 4;
+      roof.position.set(0, 1.48, -0.1);
+      this.visualGroup.add(hull, roof);
     } else if (style === 'formula') {
-      // 2. PHOTON FORMULA: узкий длинный нос и широкие антикрылья
-      const nose = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.5, 4.3), bodyMat);
+      const nose = new THREE.Mesh(new THREE.BoxGeometry(1.05, 0.48, 4.4), bodyMat);
       nose.position.y = 0.52;
-      const sidepods = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.48, 2.1), accentMat);
-      sidepods.position.set(0, 0.52, -0.3);
-      const frontWing = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.14, 0.6), darkMat);
-      frontWing.position.set(0, 0.35, 2.0);
-      const rearWing = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.2, 0.7), darkMat);
-      rearWing.position.set(0, 1.35, -1.8);
-      this.visualGroup.add(nose, sidepods, frontWing, rearWing);
+      const pods = new THREE.Mesh(new THREE.BoxGeometry(2.45, 0.45, 2.1), neonMat);
+      pods.position.set(0, 0.52, -0.25);
+      const rWing = new THREE.Mesh(new THREE.BoxGeometry(2.55, 0.18, 0.7), darkMat);
+      rWing.position.set(0, 1.35, -1.85);
+      this.visualGroup.add(nose, pods, rWing);
     } else if (style === 'muscle') {
-      // 3. OUTRUN MUSCLE: широкое купе с нагнетателем на капоте
       const body = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.68, 4.1), bodyMat);
       body.position.y = 0.6;
-      const roof = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.55, 1.9), darkMat);
-      roof.position.set(0, 1.18, -0.2);
-      const blower = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.35, 0.8), accentMat);
-      blower.position.set(0, 1.0, 1.1);
-      this.visualGroup.add(body, roof, blower);
+      const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.55, 1.9), darkMat);
+      cabin.position.set(0, 1.18, -0.2);
+      this.visualGroup.add(body, cabin);
+    } else if (style === 'buggy') {
+      const base = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.55, 3.6), bodyMat);
+      base.position.y = 0.6;
+      const cage = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.0, 1.1, 6), neonMat);
+      cage.position.set(0, 1.2, -0.2);
+      this.visualGroup.add(base, cage);
+    } else if (style === 'hyper') {
+      const wedge = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.52, 4.3), bodyMat);
+      wedge.position.y = 0.52;
+      const canopy = new THREE.Mesh(new THREE.SphereGeometry(0.78, 16, 12), neonMat);
+      canopy.scale.set(1, 0.55, 1.8);
+      canopy.position.set(0, 0.92, 0.1);
+      this.visualGroup.add(wedge, canopy);
     } else {
-      // 4. КЛАССИЧЕСКИЙ СПОРТ-КАРТ С ПИЛОТОМ В ШЛЕМЕ (с референса)
       const chassis = new THREE.Mesh(new THREE.BoxGeometry(2.25, 0.62, 3.7), bodyMat);
       chassis.position.y = 0.55;
-      const stripeL = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.65, 2.2), accentMat);
-      stripeL.position.set(-0.62, 0.56, -0.5);
-      const stripeR = stripeL.clone(); stripeR.position.x = 0.62;
-      const wing = new THREE.Mesh(new THREE.BoxGeometry(2.45, 0.18, 0.68), darkMat);
+      const wing = new THREE.Mesh(new THREE.BoxGeometry(2.45, 0.18, 0.68), neonMat);
       wing.position.set(0, 1.4, -1.6);
       const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.52, 16, 16), new THREE.MeshStandardMaterial({ color: 0xffffff }));
       helmet.position.set(0, 1.65, -0.05);
-      const hStripe = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.85, 1.1), new THREE.MeshBasicMaterial({ color: 0xff1e38 }));
+      const hStripe = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.85, 1.1), new THREE.MeshBasicMaterial({ color: bodyColor }));
       hStripe.position.set(0, 1.7, -0.05);
-      this.visualGroup.add(chassis, stripeL, stripeR, wing, helmet, hStripe);
+      this.visualGroup.add(chassis, wing, helmet, hStripe);
     }
-
-    // Задние стоп-огни и пламя турбины (общие для всех)
-    const tailMat = new THREE.MeshBasicMaterial({ color: 0xff1e27 });
-    const tailL = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.3, 0.12), tailMat);
-    tailL.position.set(-0.75, 0.6, -1.95);
-    const tailR = tailL.clone(); tailR.position.x = 0.75;
-    this.visualGroup.add(tailL, tailR);
 
     const flameGeo = new THREE.ConeGeometry(0.24, 0.95, 10);
     flameGeo.rotateX(-Math.PI / 2);
-    this.flameMat = new THREE.MeshBasicMaterial({ color: 0x00f3ff, transparent: true, opacity: 0.0 });
+    this.flameMat = new THREE.MeshBasicMaterial({ color: neonColor, transparent: true, opacity: 0.0 });
     this.flameL = new THREE.Mesh(flameGeo, this.flameMat);
-    this.flameL.position.set(-0.3, 0.65, -2.45);
-    this.flameR = this.flameL.clone(); this.flameR.position.x = 0.3;
+    this.flameL.position.set(-0.32, 0.62, -2.4);
+    this.flameR = this.flameL.clone(); this.flameR.position.x = 0.32;
     this.visualGroup.add(this.flameL, this.flameR);
 
-    // Колеса
-    const wRadius = style === 'truck' ? 0.58 : 0.48;
-    const wheelGeo = new THREE.CylinderGeometry(wRadius, wRadius, 0.46, 16);
+    const wR = style === 'truck' ? 0.58 : 0.48;
+    const wheelGeo = new THREE.CylinderGeometry(wR, wR, 0.46, 16);
     wheelGeo.rotateZ(Math.PI / 2);
-    [[-1.28, wRadius, 1.2], [1.28, wRadius, 1.2], [-1.32, wRadius, -1.18], [1.32, wRadius, -1.18]].forEach(([x, y, z]) => {
+    [[-1.28, wR, 1.2], [1.28, wR, 1.2], [-1.32, wR, -1.18], [1.32, wR, -1.18]].forEach(([x, y, z]) => {
       const w = new THREE.Mesh(wheelGeo, darkMat);
       w.position.set(x, y, z);
       this.visualGroup.add(w);
@@ -1100,55 +2019,72 @@ class KartVehicle {
     return root;
   }
 
-  /**
-   * ИСПРАВЛЕННЫЙ СПАВН НА СТАРТЕ:
-   * Ставит болид строго на стартовую прямую (u = 0.01..0.03) лицом ВПЕРЕД по вектору трассы!
-   */
-  placeOnTrack(track, startU, lateralOffset = 0) {
-    this.u = ((startU % 1) + 1) % 1;
-    const s = track.getSampleAtU(this.u);
-    this.position.copy(s.point).addScaledVector(s.right, lateralOffset);
-
-    // Смотрим вперед на точку дальше по трассе (u + 0.015), чтобы на 100% исключить разворот назад!
-    const aheadSample = track.getSampleAtU(this.u + 0.015);
-    const forwardDir = new THREE.Vector3().subVectors(aheadSample.point, s.point).normalize();
-    this.heading = Math.atan2(forwardDir.x, forwardDir.z);
-
+  placeOnTrack(world, startU, lateralOffset = 0) {
+    if (world.mode === 'freeroam') {
+      this.position.set(lateralOffset, 0.1, 20);
+      this.heading = Math.PI;
+    } else {
+      this.u = ((startU % 1) + 1) % 1;
+      const s = world.getSampleAtU(this.u);
+      this.position.copy(s.point).addScaledVector(s.right, lateralOffset);
+      const ahead = world.getSampleAtU(this.u + 0.015);
+      const dir = new THREE.Vector3().subVectors(ahead.point, s.point).normalize();
+      this.heading = Math.atan2(dir.x, dir.z);
+    }
     this.speed = 0;
-    this.steerInputSmooth = 0;
+    this.vy = 0;
+    this.airHeight = 0;
     this.lap = 1;
     this.totalProgress = this.u;
     this.finished = false;
     this.heldItem = null;
     this.boostTimer = 0;
+    this.shieldTimer = 0;
     this.syncMesh();
   }
 
-  update(dt, track, input, sound, particles) {
+  update(dt, world, input, sound, fx, callbacks) {
+    if (this.shieldTimer > 0) {
+      this.shieldTimer -= dt;
+      this.shieldMesh.visible = true;
+      this.shieldMesh.rotation.y += 4 * dt;
+    } else {
+      this.shieldMesh.visible = false;
+    }
+
     if (this.spinOutTimer > 0) {
       this.spinOutTimer -= dt;
       this.speed *= 0.92;
       this.visualGroup.rotation.y += 12 * dt;
+    } else if (this.trickSpin > 0) {
+      this.trickSpin = Math.max(0, this.trickSpin - dt * 3.5);
+      this.visualGroup.rotation.y = this.trickSpin * Math.PI * 2;
     } else {
       this.visualGroup.rotation.y *= 0.82;
     }
 
-    let throttle = 0;
-    let rawSteer = 0;
-    let wantDrift = false;
+    let throttle = 0, rawSteer = 0, wantDrift = false;
 
     if (!this.isAI && !this.finished && this.spinOutTimer <= 0) {
       if (input.up) throttle += 1;
       if (input.down) throttle -= 0.7;
       if (input.left) rawSteer += 1;
       if (input.right) rawSteer -= 1;
-      wantDrift = input.drift && Math.abs(this.speed) > 12;
+      wantDrift = input.drift && Math.abs(this.speed) > 10;
+
+      if (this.airHeight > 1.2 && input.drift && this.trickSpin <= 0) {
+        this.trickSpin = 1.0;
+        this.boostTimer = Math.max(this.boostTimer, 1.6);
+        if (sound) sound.playBoost();
+        if (callbacks.onStunt) callbacks.onStunt();
+      }
+
       if (input.useItem && this.heldItem) {
-        this.activateItem(sound);
+        this.activateItem(sound, fx);
         input.useItem = false;
       }
-    } else if (this.isAI || this.finished) {
-      const lookAhead = track.getSampleAtU(this.u + 0.03);
+    } else if (this.isAI && world.mode === 'race') {
+      const lookAhead = world.getSampleAtU(this.u + 0.028);
       const targetPt = lookAhead.point.clone().addScaledVector(lookAhead.right, this.aiTargetOffset);
       const toTarget = new THREE.Vector3().subVectors(targetPt, this.position);
       const desiredAngle = Math.atan2(toTarget.x, toTarget.z);
@@ -1156,43 +2092,37 @@ class KartVehicle {
       while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
       while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
 
-      rawSteer = THREE.MathUtils.clamp(angleDiff * 2.2, -1, 1);
+      rawSteer = THREE.MathUtils.clamp(angleDiff * this.aiSteerSharpness, -1, 1);
       throttle = this.finished ? 0.4 : this.aiSkill;
-      if (this.heldItem && !this.finished) this.activateItem(null);
+
+      if (this.aiSkill > 0.9 && Math.abs(angleDiff) > 0.35 && this.speed > 18) wantDrift = true;
+      if (Math.random() < 0.01) this.aiTargetOffset = (Math.random() - 0.5) * this.aiWander;
+      if (this.heldItem && !this.finished && Math.random() < this.aiItemChance * 0.05) {
+        this.activateItem(null, fx);
+      }
     }
 
-    // Плавное сглаживание руля (чтобы машина не дергалась из стороны в сторону у ребенка 12-14 лет)
-    this.steerInputSmooth = THREE.MathUtils.lerp(this.steerInputSmooth, rawSteer, 9.5 * dt);
+    this.steerSmooth = THREE.MathUtils.lerp(this.steerSmooth, rawSteer, 9.5 * dt);
 
-    // Плавная кривая разгона
     const isBoosting = this.boostTimer > 0;
     if (isBoosting) this.boostTimer -= dt;
     const currentMax = this.maxSpeed * (isBoosting ? 1.28 : 1.0);
     const currentAccel = this.accel * (isBoosting ? 1.45 : 1.0);
 
-    if (throttle > 0) {
-      // Мягкий прогрессивный набор скорости
-      this.speed += currentAccel * throttle * dt;
-    } else if (throttle < 0) {
-      this.speed += currentAccel * 1.1 * throttle * dt;
-    } else {
-      this.speed *= Math.pow(0.38, dt);
-    }
+    if (throttle > 0) this.speed += currentAccel * throttle * dt;
+    else if (throttle < 0) this.speed += currentAccel * 1.1 * throttle * dt;
+    else this.speed *= Math.pow(0.38, dt);
     this.speed = THREE.MathUtils.clamp(this.speed, -14, currentMax);
 
-    // Дрифт
-    if (wantDrift && Math.abs(this.steerInputSmooth) > 0.12) {
+    if (this.airHeight <= 0.1 && wantDrift && Math.abs(this.steerSmooth) > 0.12) {
       if (!this.isDrifting) {
         this.isDrifting = true;
-        this.driftDir = Math.sign(this.steerInputSmooth);
+        this.driftDir = Math.sign(this.steerSmooth);
       }
       this.driftCharge += dt;
-      if (particles && Math.random() < 0.6) {
-        particles.spawn(this.position, this.driftCharge > 0.9 ? 0x00f3ff : 0xffe600, 2);
-      }
     } else if (this.isDrifting) {
       if (this.driftCharge > 0.8) {
-        this.boostTimer = Math.max(this.boostTimer, 1.25);
+        this.boostTimer = Math.max(this.boostTimer, 1.3);
         if (!this.isAI && sound) sound.playBoost();
       }
       this.isDrifting = false;
@@ -1202,73 +2132,160 @@ class KartVehicle {
     const speedFactor = THREE.MathUtils.clamp(Math.abs(this.speed) / 14, 0.2, 1.0);
     const turnRate = this.handling * (this.isDrifting ? 1.22 : 1.0);
     const dirSign = this.speed >= -0.5 ? 1 : -1;
-    this.heading += this.steerInputSmooth * turnRate * speedFactor * dirSign * dt;
-
-    // Мягкий авто-помощник выравнивания вдоль трассы (Steering Assist на низких уровнях)
-    const trackInfoPre = track.getClosestTrackInfo(this.position, this.u);
-    if (!this.isAI && Math.abs(rawSteer) < 0.05 && this.speed > 5) {
-      const roadAngle = Math.atan2(trackInfoPre.sample.tangent.x, trackInfoPre.sample.tangent.z);
-      let diff = roadAngle - this.heading;
-      while (diff > Math.PI) diff -= Math.PI * 2;
-      while (diff < -Math.PI) diff += Math.PI * 2;
-      this.heading += diff * 1.1 * dt;
-    }
-
-    const targetRoll = -this.steerInputSmooth * 0.12 - (this.isDrifting ? this.driftDir * 0.08 : 0);
-    this.visualGroup.rotation.z = THREE.MathUtils.lerp(this.visualGroup.rotation.z, targetRoll, 10 * dt);
+    this.heading += this.steerSmooth * turnRate * speedFactor * dirSign * dt;
 
     const forward = new THREE.Vector3(Math.sin(this.heading), 0, Math.cos(this.heading));
     this.position.addScaledVector(forward, this.speed * dt);
 
-    const prevU = this.u;
-    const trackInfo = track.getClosestTrackInfo(this.position, this.u);
-    this.u = trackInfo.u;
-
-    // Счетчик кругов
-    if (prevU > 0.85 && this.u < 0.15) {
-      this.lap++;
-    } else if (prevU < 0.15 && this.u > 0.85) {
-      this.lap = Math.max(1, this.lap - 1);
-    }
-    this.totalProgress = (this.lap - 1) + this.u;
-
-    // Мягкое скольжение вдоль бортиков (без застревания в стене!)
-    const maxOffset = track.trackWidth * 0.5 - 1.35;
-    if (Math.abs(trackInfo.lateralOffset) > maxOffset) {
-      const clampedOffset = Math.sign(trackInfo.lateralOffset) * maxOffset;
-      this.position.copy(trackInfo.sample.point).addScaledVector(trackInfo.sample.right, clampedOffset);
-      this.speed *= 0.93;
-      // Выравниваем машину параллельно бортику при касании
-      const roadAngle = Math.atan2(trackInfo.sample.tangent.x, trackInfo.sample.tangent.z);
-      let diff = roadAngle - this.heading;
-      while (diff > Math.PI) diff -= Math.PI * 2;
-      while (diff < -Math.PI) diff += Math.PI * 2;
-      this.heading += diff * 4.0 * dt;
-      if (particles) particles.spawn(this.position, 0xff007f, 2);
-    } else {
-      this.position.y = THREE.MathUtils.lerp(this.position.y, trackInfo.sample.point.y, 18 * dt);
-    }
-
-    // Ускорители на дороге
-    for (const pad of track.boostPads) {
-      if (this.position.distanceToSquared(pad.position) < pad.radius * pad.radius) {
-        if (this.boostTimer < 0.3 && !this.isAI && sound) sound.playBoost();
-        this.boostTimer = 1.3;
-        if (particles) particles.spawn(this.position, 0x00f3ff, 4);
+    // Трамплины
+    for (const ramp of world.ramps) {
+      const dx = this.position.x - ramp.position.x;
+      const dz = this.position.z - ramp.position.z;
+      if (dx * dx + dz * dz < ramp.radius * ramp.radius && this.airHeight <= 0.2 && this.speed > 10) {
+        this.vy = 12.5 + Math.abs(this.speed) * 0.18;
+        this.boostTimer = Math.max(this.boostTimer, 0.8);
+        if (!this.isAI && sound) sound.playBoost();
       }
     }
 
-    // Подбор бонусов
-    for (const box of track.itemBoxes) {
+    if (this.airHeight > 0 || this.vy > 0) {
+      this.airHeight += this.vy * dt;
+      this.vy -= 28.0 * dt;
+      if (this.airHeight <= 0) {
+        this.airHeight = 0;
+        this.vy = 0;
+      }
+    }
+
+    if (world.mode === 'freeroam') {
+      this.position.x = THREE.MathUtils.clamp(this.position.x, -155, 155);
+      this.position.z = THREE.MathUtils.clamp(this.position.z, -155, 155);
+      this.position.y = this.airHeight;
+
+      for (const b of world.cityBuildings) {
+        if (Math.abs(this.position.x - b.x) < b.halfW && Math.abs(this.position.z - b.z) < b.halfD) {
+          const dx = this.position.x - b.x;
+          const dz = this.position.z - b.z;
+          if (Math.abs(dx) > Math.abs(dz)) this.position.x = b.x + Math.sign(dx) * b.halfW;
+          else this.position.z = b.z + Math.sign(dz) * b.halfD;
+          this.speed *= 0.75;
+        }
+      }
+
+      // Захват маяков в Мини-Городе
+      if (!this.isAI) {
+        for (const bc of world.beacons) {
+          if (bc.cooldown <= 0 && this.position.distanceTo(bc.position) < 5.5) {
+            bc.cooldown = 12.0;
+            bc.mesh.material.color.setHex(0xffe600);
+            if (sound) sound.playPortal();
+            if (callbacks.onBeacon) callbacks.onBeacon();
+          }
+        }
+      }
+    } else {
+      const prevU = this.u;
+      const trackInfo = world.getClosestTrackInfo(this.position, this.u);
+      this.u = trackInfo.u;
+
+      if (prevU > 0.85 && this.u < 0.15) this.lap++;
+      else if (prevU < 0.15 && this.u > 0.85) this.lap = Math.max(1, this.lap - 1);
+      this.totalProgress = (this.lap - 1) + this.u;
+
+      const maxOffset = world.trackWidth * 0.5 - 1.35;
+      if (Math.abs(trackInfo.lateralOffset) > maxOffset) {
+        const clampedOffset = Math.sign(trackInfo.lateralOffset) * maxOffset;
+        this.position.copy(trackInfo.sample.point).addScaledVector(trackInfo.sample.right, clampedOffset);
+        this.speed *= 0.93;
+        const roadAngle = Math.atan2(trackInfo.sample.tangent.x, trackInfo.sample.tangent.z);
+        let diff = roadAngle - this.heading;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        this.heading += diff * 4.0 * dt;
+      }
+      this.position.y = THREE.MathUtils.lerp(this.position.y, trackInfo.sample.point.y + this.airHeight, 18 * dt);
+    }
+
+    // Ускорители
+    for (const pad of world.boostPads) {
+      if (this.position.distanceToSquared(pad.position) < pad.radius * pad.radius) {
+        if (this.boostTimer < 0.3 && !this.isAI && sound) sound.playBoost();
+        this.boostTimer = 1.35;
+      }
+    }
+
+    // Разрушаемые кибер-ящики!
+    for (const crate of world.crates) {
+      if (crate.active && this.position.distanceToSquared(crate.position) < 6.2) {
+        crate.active = false;
+        crate.cooldown = 7.0;
+        crate.mesh.visible = false;
+        this.boostTimer = Math.max(this.boostTimer, 0.95);
+        if (fx) fx.burst(crate.position, 0xff007f, 14);
+        if (!this.isAI) {
+          if (sound) sound.playCrate();
+          if (callbacks.onCrate) callbacks.onCrate();
+        }
+      }
+    }
+
+    // Движущиеся лазерные ворота
+    for (const gate of world.laserGates) {
+      if (this.position.distanceToSquared(gate.mesh.position) < 4.5) {
+        if (this.shieldTimer <= 0) {
+          this.spinOutTimer = 0.85;
+          this.speed *= 0.4;
+          if (!this.isAI && sound) sound.playHit();
+        }
+        if (fx) fx.burst(this.position, 0xff0055, 10);
+      }
+    }
+
+    // Кольца Телепорта (Warp Portals)
+    for (const portal of world.portals) {
+      if (portal.cooldown <= 0 && this.position.distanceToSquared(portal.position) < 9.0) {
+        portal.cooldown = 3.0;
+        const targetSample = world.getSampleAtU(portal.targetU);
+        const aheadSample = world.getSampleAtU(portal.targetU + 0.015);
+        this.position.copy(targetSample.point);
+        const dir = new THREE.Vector3().subVectors(aheadSample.point, targetSample.point).normalize();
+        this.heading = Math.atan2(dir.x, dir.z);
+        this.u = portal.targetU;
+        this.boostTimer = 2.0;
+        if (fx) fx.burst(this.position, 0x00f3ff, 18);
+        if (!this.isAI) {
+          if (sound) sound.playPortal();
+          if (callbacks.onPortal) callbacks.onPortal();
+        }
+      }
+    }
+
+    // Монеты
+    if (!this.isAI) {
+      for (const c of world.coins) {
+        if (c.active && this.position.distanceToSquared(c.position) < 5.5) {
+          c.active = false;
+          c.cooldown = 8.0;
+          c.mesh.visible = false;
+          if (sound) sound.playCoin();
+          if (callbacks.onCoin) callbacks.onCoin();
+        }
+      }
+    }
+
+    // Бонус-кубы (5 интерактивных видов вооружения)
+    for (const box of world.itemBoxes) {
       if (box.active && this.position.distanceToSquared(box.position) < 6.5) {
         box.active = false;
         box.cooldown = 4.5;
         box.mesh.visible = false;
         if (!this.heldItem) {
           const items = [
-            { id: 'nitro', name: 'КИБЕР-НИТРО', icon: '🚀' },
-            { id: 'emp', name: 'ЭМИ-РАЗРЯД', icon: '⚡' },
-            { id: 'shield', name: 'НЕОН-ЩИТ', icon: '🛡️' }
+            { id: 'plasma', name: 'ПЛАЗМА-РАКЕТА', icon: '🚀' },
+            { id: 'mine',   name: 'НЕОН-МИНА',     icon: '💣' },
+            { id: 'shield', name: 'КИБЕР-ЩИТ',     icon: '🛡️' },
+            { id: 'emp',    name: 'ЭМИ-ШТОРМ',     icon: '⚡' },
+            { id: 'nitro',  name: 'ГИПЕР-НИТРО',   icon: '🔥' }
           ];
           this.heldItem = items[Math.floor(Math.random() * items.length)];
           if (!this.isAI && sound) sound.playPickup();
@@ -1280,19 +2297,26 @@ class KartVehicle {
     this.syncMesh();
   }
 
-  activateItem(sound) {
+  activateItem(sound, fx) {
     if (!this.heldItem) return;
     const item = this.heldItem;
     this.heldItem = null;
     if (item.id === 'nitro') {
-      this.boostTimer = 2.2;
+      this.boostTimer = 2.4;
       if (sound) sound.playBoost();
+    } else if (item.id === 'shield') {
+      this.shieldTimer = 6.5;
+      if (sound) sound.playPortal();
+    } else if (item.id === 'plasma' && fx) {
+      fx.spawnPlasmaRocket(this, this.position, this.heading);
+      if (sound) sound.playBoost();
+    } else if (item.id === 'mine' && fx) {
+      const back = new THREE.Vector3(-Math.sin(this.heading), 0, -Math.cos(this.heading));
+      fx.dropMine(this, this.position.clone().addScaledVector(back, 3.0));
+      if (sound) sound.playPickup();
     } else if (item.id === 'emp') {
       this.triggerEMP = true;
       if (sound) sound.playBoost();
-    } else if (item.id === 'shield') {
-      this.boostTimer = 1.2;
-      if (sound) sound.playPickup();
     }
   }
 
@@ -1304,46 +2328,12 @@ class KartVehicle {
 
 /**
  * ============================================================================
- * 6. ПУЛ ЧАСТИЦ И ОСНОВНОЙ ИГРОВОЙ ДВИЖОК
+ * 8. ГЛАВНЫЙ ДВИЖОК, СИСТЕМА ЖИВЫХ МИССИЙ И УПРАВЛЕНИЕ UI
  * ============================================================================
  */
-class ParticlePool {
-  constructor(scene, maxCount = 80) {
-    this.pool = [];
-    const geo = new THREE.BoxGeometry(0.28, 0.28, 0.28);
-    for (let i = 0; i < maxCount; i++) {
-      const mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0x00f3ff }));
-      mesh.visible = false;
-      scene.add(mesh);
-      this.pool.push({ mesh, vel: new THREE.Vector3(), life: 0 });
-    }
-  }
-  spawn(pos, colorHex, count = 3) {
-    let n = 0;
-    for (const p of this.pool) {
-      if (p.life <= 0) {
-        p.life = 0.35 + Math.random() * 0.2;
-        p.mesh.visible = true;
-        p.mesh.material.color.setHex(colorHex);
-        p.mesh.position.copy(pos);
-        p.vel.set((Math.random() - 0.5) * 12, 3 + Math.random() * 6, (Math.random() - 0.5) * 12);
-        if (++n >= count) break;
-      }
-    }
-  }
-  update(dt) {
-    for (const p of this.pool) {
-      if (p.life > 0) {
-        p.life -= dt;
-        p.mesh.position.addScaledVector(p.vel, dt);
-        if (p.life <= 0) p.mesh.visible = false;
-      }
-    }
-  }
-}
-
 class GameEngine {
   constructor() {
+    this.profile = new ProfileManager();
     this.canvas = document.getElementById('game-canvas');
     this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -1351,55 +2341,81 @@ class GameEngine {
 
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x0b0418);
-    this.scene.fog = new THREE.FogExp2(0x160729, 0.0022);
+    this.scene.fog = new THREE.FogExp2(0x160729, 0.0020);
 
-    this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.5, 900);
+    this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.5, 950);
     this.cameraLookTarget = new THREE.Vector3();
+    this.camMode = 0; // 0 = Стандарт, 1 = Близкий Дрифт, 2 = Высокий Обзор
 
     this.assets = new AssetVault();
     this.sound = new SoundEngine();
-    this.track = new TrackBuilder(this.scene, this.assets);
-    this.particles = new ParticlePool(this.scene, 80);
+    this.world = new WorldBuilder(this.scene, this.assets);
+    this.fx = new InteractiveFXManager(this.scene);
 
-    this.setupLights();
-    this.setupInputs();
+    this.scene.add(new THREE.AmbientLight(0xd8c8ff, 0.8));
+    const dirLight = new THREE.DirectionalLight(0xfff0dd, 1.1);
+    dirLight.position.set(60, 120, 50);
+    this.scene.add(dirLight);
 
-    this.selectedLevelIdx = 1; // По умолчанию LVL 2 (комфортная скорость для 12-14 лет)
+    this.selectedMode = 'race';
+    this.selectedLevelIdx = 1;
     this.selectedTrackIdx = 0;
-    this.selectedCarIdx = 0;
     this.totalLaps = 3;
     this.karts = [];
     this.playerKart = null;
     this.state = 'MENU';
     this.raceTimer = 0;
     this.countdownTimer = 0;
+    this.shakeAmount = 0;
 
+    // Система живых контрактов (Live Missions)
+    this.missions = [
+      { type: 'crates',  goal: 4, progress: 0, title: 'Разбейте 4 кибер-ящика на трассе' },
+      { type: 'coins',   goal: 8, progress: 0, title: 'Соберите 8 золотых кибер-монет' },
+      { type: 'stunts',  goal: 2, progress: 0, title: 'Выполните 2 трюка (Space в прыжке)' },
+      { type: 'portals', goal: 1, progress: 0, title: 'Пройдите сквозь синий Телепорт-Портал' }
+    ];
+    this.currentMissionIdx = 0;
+
+    this.renderTrackSelectorButtons();
+    this.setupInputs();
     this.initSceneObjects();
-    window.addEventListener('resize', () => this.onResize());
+    this.refreshAllMenuUI();
+
+    window.addEventListener('resize', () => {
+      this.camera.aspect = window.innerWidth / window.innerHeight;
+      this.camera.updateProjectionMatrix();
+      this.renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
     this.lastTime = performance.now();
     requestAnimationFrame((t) => this.loop(t));
   }
 
-  setupLights() {
-    this.scene.add(new THREE.AmbientLight(0xd8c8ff, 0.78));
-    const dirLight = new THREE.DirectionalLight(0xfff0dd, 1.1);
-    dirLight.position.set(60, 120, 50);
-    this.scene.add(dirLight);
-
-    const neon1 = new THREE.PointLight(0x00f3ff, 1.5, 180);
-    neon1.position.set(0, 22, 0);
-    this.scene.add(neon1);
+  renderTrackSelectorButtons() {
+    const container = document.getElementById('track-selector');
+    container.innerHTML = '';
+    TRACK_CATALOG.forEach((tr, idx) => {
+      const btn = document.createElement('div');
+      btn.className = `opt-btn ${idx === this.selectedTrackIdx ? 'active' : ''}`;
+      btn.setAttribute('data-track', idx);
+      btn.innerHTML = `${tr.code}: ${tr.name}<small>${tr.desc}</small>`;
+      container.appendChild(btn);
+    });
   }
 
   setupInputs() {
     this.input = { up: false, down: false, left: false, right: false, drift: false, useItem: false };
     const mapKey = (code, pressed) => {
+      if (document.activeElement && document.activeElement.id === 'pilot-name-input') return;
       if (code === 'KeyW' || code === 'ArrowUp') this.input.up = pressed;
       if (code === 'KeyS' || code === 'ArrowDown') this.input.down = pressed;
       if (code === 'KeyA' || code === 'ArrowLeft') this.input.left = pressed;
       if (code === 'KeyD' || code === 'ArrowRight') this.input.right = pressed;
       if (code === 'Space') this.input.drift = pressed;
       if (code === 'ShiftLeft' || code === 'ShiftRight') this.input.useItem = pressed;
+      if (code === 'KeyC' && pressed) this.cycleCameraView();
+      if (code === 'KeyH' && pressed) this.triggerCyberHorn();
       if (code === 'Escape' && pressed) this.togglePauseMenu();
     };
     window.addEventListener('keydown', (e) => mapKey(e.code, true));
@@ -1420,124 +2436,278 @@ class GameEngine {
     });
   }
 
+  cycleCameraView() {
+    this.camMode = (this.camMode + 1) % 3;
+    const names = ['СТАНДАРТ', 'ДРИФТ-КАМЕРА', 'ПАНОРАМА'];
+    this.showFloatingCombo(`🎥 КАМЕРА: ${names[this.camMode]}`);
+  }
+
+  triggerCyberHorn() {
+    if (!this.playerKart || this.state !== 'RACING') return;
+    this.sound.playHorn();
+    this.fx.burst(this.playerKart.position, 0x00f3ff, 12);
+    // Кибер-гудок расталкивает ближайшие ящики и слегка отталкивает ботов!
+    this.karts.forEach(other => {
+      if (other !== this.playerKart && other.position.distanceTo(this.playerKart.position) < 9.0) {
+        const push = new THREE.Vector3().subVectors(other.position, this.playerKart.position).normalize().multiplyScalar(2.5);
+        other.position.add(push);
+      }
+    });
+    this.showFloatingCombo('🎺 CYBER-BASS WAVE!');
+  }
+
+  advanceMission(type) {
+    const m = this.missions[this.currentMissionIdx];
+    if (!m || m.type !== type) return;
+    m.progress++;
+    if (m.progress >= m.goal) {
+      this.profile.data.credits += 350;
+      this.profile.data.xp += 100;
+      this.profile.save();
+      document.getElementById('hud-coins').textContent = this.profile.data.credits;
+      this.sound.playPortal();
+      this.showFloatingCombo('⚡ КОНТРАКТ ВЫПОЛНЕН! +350 CR!');
+      m.progress = 0;
+      this.currentMissionIdx = (this.currentMissionIdx + 1) % this.missions.length;
+    }
+    this.updateMissionHUD();
+  }
+
+  updateMissionHUD() {
+    const m = this.missions[this.currentMissionIdx];
+    document.getElementById('hud-mission-text').textContent = `${m.title} (${m.progress}/${m.goal})`;
+    const pct = Math.min(100, Math.round((m.progress / m.goal) * 100));
+    document.getElementById('hud-mission-fill').style.width = `${pct}%`;
+  }
+
   initSceneObjects() {
-    this.track.build(this.selectedTrackIdx);
+    this.fx.clearAllWeapons();
+    this.world.build(this.selectedMode, this.selectedTrackIdx);
     this.karts.forEach(k => this.scene.remove(k.mesh));
     this.karts = [];
 
-    const lvlCfg = DIFFICULTY_LEVELS[this.selectedLevelIdx];
-    const carCfg = CAR_SPECS[this.selectedCarIdx];
+    const lvlCfg = DIFFICULTY_LEVELS[this.selectedLevelIdx] || DIFFICULTY_LEVELS[1];
+    const effCar = this.profile.getEffectiveCarStats(this.profile.data.selectedCarId);
 
-    // Болид игрока спавнится на стартовой прямой (u = 0.025) строго лицом вперед по трассе!
     this.playerKart = new KartVehicle(this.scene, {
-      name: carCfg.name,
-      style: carCfg.style,
-      color: carCfg.color,
+      name: this.profile.data.pilotName,
+      style: effCar.style,
+      color: effCar.color,
+      neon: effCar.neon,
       isAI: false,
-      maxSpeed: lvlCfg.maxSpeed * carCfg.speedBonus,
-      accel: lvlCfg.accel * carCfg.accelBonus,
-      handling: lvlCfg.handling * carCfg.turnBonus
+      maxSpeed: effCar.maxSpeed,
+      accel: effCar.accel,
+      handling: effCar.handling
     });
-    this.playerKart.placeOnTrack(this.track, 0.025, -2.5);
+    this.playerKart.placeOnTrack(this.world, 0.028, -2.6);
     this.karts.push(this.playerKart);
 
-    // 3 Соперника ИИ на разных типах машин
-    const aiStyles = ['truck', 'formula', 'muscle'];
-    const aiColors = [0x00f3ff, 0xffe600, 0x00ff66];
-    for (let i = 0; i < 3; i++) {
-      const ai = new KartVehicle(this.scene, {
-        name: `CyberBot ${i + 1}`,
-        style: aiStyles[i],
-        color: aiColors[i],
-        isAI: true,
-        maxSpeed: lvlCfg.maxSpeed * (0.94 + i * 0.03),
-        accel: lvlCfg.accel * 0.95,
-        handling: lvlCfg.handling,
-        aiSkill: lvlCfg.aiRatio
-      });
-      ai.placeOnTrack(this.track, 0.018 - i * 0.005, (i % 2 === 0) ? 2.5 : -2.5);
-      this.karts.push(ai);
+    if (this.selectedMode === 'race') {
+      const botCount = lvlCfg.botCount;
+      for (let i = 0; i < botCount; i++) {
+        const aiSpec = CAR_CATALOG[(this.profile.data.selectedCarId + i + 1) % CAR_CATALOG.length];
+        const ai = new KartVehicle(this.scene, {
+          name: `AI Bot #${i + 1}`,
+          style: aiSpec.style,
+          color: aiSpec.color,
+          neon: aiSpec.neon,
+          isAI: true,
+          maxSpeed: effCar.maxSpeed * (0.95 + (i % 3) * 0.025),
+          accel: effCar.accel * 0.96,
+          handling: effCar.handling,
+          aiSkill: lvlCfg.aiSkill,
+          aiSteerSharpness: lvlCfg.aiSteerSharpness,
+          aiWander: lvlCfg.aiWander,
+          aiItemChance: lvlCfg.itemChance
+        });
+        const row = Math.floor((i + 1) / 2);
+        const side = (i % 2 === 0) ? 2.6 : -2.6;
+        ai.placeOnTrack(this.world, 0.028 - row * 0.006, side);
+        this.karts.push(ai);
+      }
     }
 
-    // Мгновенно ставим камеру строго за спиной болида игрока!
     this.snapCameraBehindPlayer();
   }
 
   snapCameraBehindPlayer() {
     if (!this.playerKart) return;
     const forward = new THREE.Vector3(Math.sin(this.playerKart.heading), 0, Math.cos(this.playerKart.heading));
-    const camPos = this.playerKart.position.clone()
-      .addScaledVector(forward, -11.5)
-      .add(new THREE.Vector3(0, 5.0, 0));
-    this.camera.position.copy(camPos);
+    this.camera.position.copy(this.playerKart.position).addScaledVector(forward, -11.5).add(new THREE.Vector3(0, 5.2, 0));
     this.cameraLookTarget.copy(this.playerKart.position).addScaledVector(forward, 8.0).add(new THREE.Vector3(0, 1.4, 0));
     this.camera.lookAt(this.cameraLookTarget);
   }
 
-  startRace() {
+  startSession() {
     this.sound.init();
     this.initSceneObjects();
+    this.updateMissionHUD();
+
     document.getElementById('main-menu').style.display = 'none';
     document.getElementById('hud').style.display = 'block';
 
-    const theme = CITY_THEMES[this.selectedTrackIdx];
-    const lvl = DIFFICULTY_LEVELS[this.selectedLevelIdx];
-    document.getElementById('hud-channel').textContent = `${theme.name.split('//')[0].trim()} // ${lvl.label}`;
+    const effCar = this.profile.getEffectiveCarStats(this.profile.data.selectedCarId);
+    document.getElementById('hud-avatar').src = this.profile.avatarURLs[this.profile.data.avatarId];
+    document.getElementById('hud-pilot-name').textContent = this.profile.data.pilotName;
+    document.getElementById('hud-coins').textContent = this.profile.data.credits;
+    document.getElementById('hud-car-label').textContent = `KM/H // ${effCar.name.toUpperCase()}`;
 
-    this.state = 'COUNTDOWN';
-    this.countdownTimer = 3.2;
-    this.raceTimer = 0;
+    if (this.selectedMode === 'freeroam') {
+      document.getElementById('hud-channel').textContent = 'FREE ROAM // КИБЕР МИНИ-ГОРОД';
+      document.getElementById('hud-pos').textContent = 'CITY';
+      document.getElementById('hud-lap-box').innerHTML = 'РЕЖИМ <span>ГОРОД</span>';
+      this.state = 'RACING';
+      this.raceTimer = 0;
+    } else {
+      const tr = TRACK_CATALOG[this.selectedTrackIdx];
+      const lvl = DIFFICULTY_LEVELS[this.selectedLevelIdx];
+      document.getElementById('hud-channel').textContent = `${tr.code}: ${tr.name} // ${lvl.label} (${lvl.botCount} ботов)`;
+      document.getElementById('hud-lap-box').innerHTML = 'LAP <span id="hud-lap-val">1/3</span>';
+      this.state = 'COUNTDOWN';
+      this.countdownTimer = 3.2;
+      this.raceTimer = 0;
+    }
   }
 
   togglePauseMenu() {
     const menu = document.getElementById('main-menu');
     if (menu.style.display === 'none') {
       menu.style.display = 'flex';
+      this.state = 'MENU';
       this.sound.muteEngine();
-    } else if (this.state === 'RACING') {
-      menu.style.display = 'none';
+      this.refreshAllMenuUI();
+    } else {
+      this.startSession();
     }
   }
 
-  onResize() {
-    this.camera.aspect = window.innerWidth / window.innerHeight;
-    this.camera.updateProjectionMatrix();
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+  refreshAllMenuUI() {
+    const d = this.profile.data;
+    const effCar = this.profile.getEffectiveCarStats(d.selectedCarId);
+    const upg = this.profile.getUpgradesForCar(d.selectedCarId);
+
+    document.getElementById('header-avatar-img').src = this.profile.avatarURLs[d.avatarId];
+    document.getElementById('header-pilot-name').textContent = d.pilotName;
+    document.getElementById('header-level').textContent = this.profile.getRankLevel();
+    document.getElementById('header-credits').textContent = d.credits;
+    document.getElementById('header-cars-count').textContent = `${d.unlockedCars.length}/${CAR_CATALOG.length}`;
+
+    document.getElementById('selected-car-title').textContent = `${effCar.name} (${effCar.tier} • ${effCar.kmh} км/ч)`;
+    document.getElementById('tuning-summary-text').textContent =
+      `Текущая мощность: ${effCar.kmh} км/ч | Прокачка: Двиг ${upg.engine}/5 • Турбо ${upg.turbo}/5 • Шины ${upg.tires}/5`;
+    document.getElementById('race-car-indicator').textContent =
+      `Активен: ${effCar.name} (${effCar.kmh} км/ч)`;
+
+    const renderDots = (elId, val) => {
+      const el = document.getElementById(elId);
+      el.innerHTML = '';
+      for (let i = 0; i < 5; i++) {
+        const dot = document.createElement('div');
+        dot.className = `u-dot ${i < val ? 'filled' : ''}`;
+        el.appendChild(dot);
+      }
+    };
+    renderDots('dots-engine', upg.engine);
+    renderDots('dots-turbo', upg.turbo);
+    renderDots('dots-tires', upg.tires);
+
+    // Рендер 25 машин
+    const garageEl = document.getElementById('garage-list');
+    garageEl.innerHTML = '';
+    CAR_CATALOG.forEach(car => {
+      const unlocked = d.unlockedCars.includes(car.id);
+      const selected = d.selectedCarId === car.id;
+      const cEff = this.profile.getEffectiveCarStats(car.id);
+      const card = document.createElement('div');
+      card.className = `car-card ${selected ? 'selected' : ''} ${!unlocked ? 'locked' : ''}`;
+      card.setAttribute('data-car-id', car.id);
+
+      const hexColor = '#' + car.color.toString(16).padStart(6, '0');
+      const topPct = Math.min(100, Math.round((cEff.kmh / 175) * 100));
+      const accPct = Math.min(100, Math.round((cEff.accel / 45) * 100));
+      const hndPct = Math.min(100, Math.round(((cEff.handling - 2.0) / 1.5) * 100));
+
+      card.innerHTML = `
+        <div class="car-tier-badge" style="background:${hexColor}; color:#000;">${car.tier} • ${cEff.kmh} КМ/Ч</div>
+        <div class="car-name">${car.name}</div>
+        <div class="stat-row"><span>СКОР</span><div class="stat-bar"><div class="stat-fill" style="width:${topPct}%"></div></div></div>
+        <div class="stat-row"><span>РАЗГ</span><div class="stat-bar"><div class="stat-fill" style="width:${accPct}%"></div></div></div>
+        <div class="stat-row"><span>РУЛЬ</span><div class="stat-bar"><div class="stat-fill" style="width:${hndPct}%"></div></div></div>
+        <div class="car-action-label" style="background:${selected ? '#00ff66' : (unlocked ? 'rgba(0,243,255,0.2)' : 'rgba(255,230,0,0.2)')}; color:${selected ? '#000' : '#fff'};">
+          ${selected ? '✓ АКТИВЕН' : (unlocked ? 'ВЫБРАТЬ' : `🔒 КУПИТЬ: ${car.price} CR`)}
+        </div>
+      `;
+      garageEl.appendChild(card);
+    });
+
+    // Рендер аватарок
+    document.getElementById('pilot-name-input').value = d.pilotName;
+    const avGrid = document.getElementById('avatar-selector');
+    avGrid.innerHTML = '';
+    AVATAR_PRESETS.forEach((av, idx) => {
+      const div = document.createElement('div');
+      div.className = `avatar-item ${d.avatarId === idx ? 'active' : ''}`;
+      div.setAttribute('data-avatar-id', idx);
+      div.innerHTML = `<img src="${this.profile.avatarURLs[idx]}" alt="${av.title}"/><span>${av.title}</span>`;
+      avGrid.appendChild(div);
+    });
+
+    document.getElementById('profile-stats-box').innerHTML = `
+      <div class="stat-tile"><small>РАНГ ПИЛОТА</small><b>УРОВЕНЬ ${this.profile.getRankLevel()} (${d.xp} XP)</b></div>
+      <div class="stat-tile"><small>БАЛАНС КРЕДИТОВ</small><b>🪙 ${d.credits} CR</b></div>
+      <div class="stat-tile"><small>ОТКРЫТО БОЛИДОВ</small><b>🏎️ ${d.unlockedCars.length} из 25</b></div>
+      <div class="stat-tile"><small>СБИТО КИБЕР-ЯЩИКОВ</small><b>📦 ${d.cratesSmashing || 0}</b></div>
+      <div class="stat-tile"><small>ВОЗДУШНЫХ ТРЮКОВ</small><b>🔥 ${d.stuntsDone}</b></div>
+      <div class="stat-tile"><small>МАКС. СКОРОСТЬ МАШИНЫ</small><b>⚡ ${effCar.kmh} КМ/Ч</b></div>
+    `;
   }
 
   updateCamera(dt) {
     if (!this.playerKart) return;
     if (this.state === 'MENU') {
       const t = performance.now() * 0.00022;
-      this.camera.position.set(Math.cos(t) * 95, 38, Math.sin(t) * 95);
+      this.camera.position.set(Math.cos(t) * 90, 36, Math.sin(t) * 90);
       this.camera.lookAt(0, 8, 0);
       return;
     }
 
+    const camPresets = [
+      { dist: -11.5, height: 5.2, lookAhead: 8.0 },
+      { dist: -8.0,  height: 3.4, lookAhead: 11.0 },
+      { dist: -17.0, height: 9.5, lookAhead: 6.0 }
+    ];
+    const preset = camPresets[this.camMode] || camPresets[0];
+
     const forward = new THREE.Vector3(Math.sin(this.playerKart.heading), 0, Math.cos(this.playerKart.heading));
     const desiredCamPos = this.playerKart.position.clone()
-      .addScaledVector(forward, -11.5)
-      .add(new THREE.Vector3(0, 5.0, 0));
+      .addScaledVector(forward, preset.dist)
+      .add(new THREE.Vector3(0, preset.height, 0));
+
+    if (this.shakeAmount > 0) {
+      desiredCamPos.x += (Math.random() - 0.5) * this.shakeAmount;
+      desiredCamPos.y += (Math.random() - 0.5) * this.shakeAmount;
+      this.shakeAmount = Math.max(0, this.shakeAmount - dt * 3.5);
+    }
 
     this.camera.position.lerp(desiredCamPos, 12 * dt);
-    const lookTarget = this.playerKart.position.clone().addScaledVector(forward, 8.0).add(new THREE.Vector3(0, 1.4, 0));
+    const lookTarget = this.playerKart.position.clone().addScaledVector(forward, preset.lookAhead).add(new THREE.Vector3(0, 1.4, 0));
     this.cameraLookTarget.lerp(lookTarget, 16 * dt);
     this.camera.lookAt(this.cameraLookTarget);
   }
 
   updateHUD() {
-    const clampedLap = Math.min(this.totalLaps, this.playerKart.lap);
-    document.getElementById('hud-lap-val').textContent = `${clampedLap}/${this.totalLaps}`;
+    if (this.selectedMode === 'race') {
+      const lapEl = document.getElementById('hud-lap-val');
+      if (lapEl) lapEl.textContent = `${Math.min(this.totalLaps, this.playerKart.lap)}/${this.totalLaps}`;
+      const sorted = [...this.karts].sort((a, b) => b.totalProgress - a.totalProgress);
+      document.getElementById('hud-pos').textContent = `${sorted.indexOf(this.playerKart) + 1}/${this.karts.length}`;
+    }
 
     const mins = Math.floor(this.raceTimer / 60);
     const secs = Math.floor(this.raceTimer % 60);
     const ms = Math.floor((this.raceTimer % 1) * 100);
     document.getElementById('hud-timer-val').textContent =
       `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${String(ms).padStart(2, '0')}`;
-
-    const sorted = [...this.karts].sort((a, b) => b.totalProgress - a.totalProgress);
-    const posIdx = sorted.indexOf(this.playerKart) + 1;
-    document.getElementById('hud-pos').textContent = `${posIdx}/${this.karts.length}`;
 
     const itemIcon = document.getElementById('hud-item-icon');
     const itemName = document.getElementById('hud-item-name');
@@ -1551,7 +2721,7 @@ class GameEngine {
 
     const kmh = Math.round(Math.abs(this.playerKart.speed) * 2.4);
     document.getElementById('hud-speed-val').textContent = kmh;
-    this.drawSpeedometer(kmh / 145);
+    this.drawSpeedometer(kmh / 165);
     this.drawMinimap();
   }
 
@@ -1578,24 +2748,25 @@ class GameEngine {
     const c = document.getElementById('minimap-canvas');
     const ctx = c.getContext('2d');
     ctx.clearRect(0, 0, c.width, c.height);
-    const scale = 0.65;
+    const scale = 0.60;
     const cx = c.width * 0.5;
     const cy = c.height * 0.5;
 
-    ctx.beginPath();
-    this.track.samples.forEach((s, idx) => {
-      const mx = cx + s.point.x * scale;
-      const my = cy + s.point.z * scale;
-      if (idx === 0) ctx.moveTo(mx, my);
-      else ctx.lineTo(mx, my);
-    });
-    ctx.closePath();
-    ctx.lineWidth = 5;
-    ctx.strokeStyle = 'rgba(0, 243, 255, 0.35)';
-    ctx.stroke();
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = '#ffffff';
-    ctx.stroke();
+    if (this.selectedMode === 'race') {
+      ctx.beginPath();
+      this.world.samples.forEach((s, idx) => {
+        const mx = cx + s.point.x * scale;
+        const my = cy + s.point.z * scale;
+        if (idx === 0) ctx.moveTo(mx, my);
+        else ctx.lineTo(mx, my);
+      });
+      ctx.closePath();
+      ctx.lineWidth = 5; ctx.strokeStyle = 'rgba(0, 243, 255, 0.35)'; ctx.stroke();
+      ctx.lineWidth = 2; ctx.strokeStyle = '#ffffff'; ctx.stroke();
+    } else {
+      ctx.strokeStyle = 'rgba(0, 243, 255, 0.4)';
+      ctx.strokeRect(cx - 90, cy - 70, 180, 140);
+    }
 
     this.karts.forEach(k => {
       const mx = cx + k.position.x * scale;
@@ -1605,6 +2776,13 @@ class GameEngine {
       ctx.fillStyle = k === this.playerKart ? '#00ff66' : '#ff007f';
       ctx.fill();
     });
+  }
+
+  showFloatingCombo(text) {
+    const el = document.getElementById('hud-combo-val');
+    el.textContent = text;
+    clearTimeout(this.comboTimeout);
+    this.comboTimeout = setTimeout(() => { el.textContent = ''; }, 1900);
   }
 
   loop(now) {
@@ -1626,7 +2804,8 @@ class GameEngine {
     } else if (this.state === 'RACING') {
       this.raceTimer += dt;
 
-      this.track.itemBoxes.forEach(b => {
+      // Анимация бонус-кубов, монет, разрушаемых ящиков, лазеров и порталов
+      this.world.itemBoxes.forEach(b => {
         b.mesh.rotation.y += 2.4 * dt;
         if (!b.active) {
           b.cooldown -= dt;
@@ -1634,20 +2813,99 @@ class GameEngine {
         }
       });
 
+      this.world.coins.forEach(c => {
+        c.mesh.rotation.y += 3.2 * dt;
+        if (!c.active) {
+          c.cooldown -= dt;
+          if (c.cooldown <= 0) { c.active = true; c.mesh.visible = true; }
+        }
+      });
+
+      this.world.crates.forEach(cr => {
+        cr.mesh.rotation.y += 1.2 * dt;
+        if (!cr.active) {
+          cr.cooldown -= dt;
+          if (cr.cooldown <= 0) { cr.active = true; cr.mesh.visible = true; }
+        }
+      });
+
+      this.world.laserGates.forEach(gate => {
+        const offset = Math.sin(this.raceTimer * 2.4 + gate.phase) * 5.8;
+        gate.mesh.position.copy(gate.basePoint).addScaledVector(gate.rightVec, offset).add(new THREE.Vector3(0, 2.75, 0));
+      });
+
+      this.world.portals.forEach(p => {
+        p.mesh.rotation.z += 3.5 * dt;
+        if (p.cooldown > 0) p.cooldown -= dt;
+      });
+
+      this.world.beacons.forEach(bc => {
+        bc.mesh.rotation.y += 2.0 * dt;
+        if (bc.cooldown > 0) {
+          bc.cooldown -= dt;
+          if (bc.cooldown <= 0) bc.mesh.material.color.setHex(0x00ff66);
+        }
+      });
+
       this.karts.forEach(k => {
-        k.update(dt, this.track, this.input, this.sound, this.particles);
+        k.update(dt, this.world, this.input, this.sound, this.fx, {
+          onCoin: () => {
+            this.profile.data.credits += 15;
+            this.profile.data.xp += 10;
+            this.profile.save();
+            document.getElementById('hud-coins').textContent = this.profile.data.credits;
+            this.showFloatingCombo('🪙 +15 CR // МОНЕТА!');
+            this.advanceMission('coins');
+          },
+          onStunt: () => {
+            this.profile.data.credits += 45;
+            this.profile.data.xp += 30;
+            this.profile.data.stuntsDone += 1;
+            this.profile.save();
+            document.getElementById('hud-coins').textContent = this.profile.data.credits;
+            this.showFloatingCombo('🔥 AIR TRICK! +45 CR!');
+            this.advanceMission('stunts');
+          },
+          onCrate: () => {
+            this.profile.data.credits += 25;
+            this.profile.data.cratesSmashing = (this.profile.data.cratesSmashing || 0) + 1;
+            this.profile.save();
+            this.shakeAmount = 0.7;
+            document.getElementById('hud-coins').textContent = this.profile.data.credits;
+            this.showFloatingCombo('📦 КИБЕР-ЯЩИК СБИТ! +25 CR + НИТРО!');
+            this.advanceMission('crates');
+          },
+          onPortal: () => {
+            this.shakeAmount = 0.9;
+            this.showFloatingCombo('🌀 ГИПЕР-ТЕЛЕПОРТ ВПЕРЕД!');
+            this.advanceMission('portals');
+          },
+          onBeacon: () => {
+            this.profile.data.credits += 80;
+            this.profile.save();
+            document.getElementById('hud-coins').textContent = this.profile.data.credits;
+            this.showFloatingCombo('📡 МАЯК ЗАХВАЧЕН! +80 CR!');
+          }
+        });
+
         if (k.triggerEMP) {
           k.triggerEMP = false;
           this.karts.forEach(other => {
-            if (other !== k && other.position.distanceTo(k.position) < 40) {
-              other.spinOutTimer = 0.9;
-              this.particles.spawn(other.position, 0xff007f, 6);
+            if (other !== k && other.shieldTimer <= 0 && other.position.distanceTo(k.position) < 42) {
+              other.spinOutTimer = 0.95;
+              this.fx.burst(other.position, 0x00f3ff, 12);
             }
           });
         }
       });
 
-      // Столкновения между машинами
+      this.fx.update(dt, this.karts, this.sound, () => {
+        this.profile.data.credits += 50;
+        this.profile.save();
+        document.getElementById('hud-coins').textContent = this.profile.data.credits;
+        this.showFloatingCombo('🎯 ПРЯМОЕ ПОПАДАНИЕ РАКЕТОЙ! +50 CR!');
+      });
+
       for (let i = 0; i < this.karts.length; i++) {
         for (let j = i + 1; j < this.karts.length; j++) {
           const a = this.karts[i], b = this.karts[j];
@@ -1661,20 +2919,25 @@ class GameEngine {
       }
 
       this.sound.updateEngine(
-        Math.abs(this.playerKart.speed) / this.playerKart.maxSpeed,
+        Math.abs(this.playerKart.speed) * 2.4,
         this.playerKart.isDrifting,
         this.playerKart.boostTimer > 0
       );
 
-      if (this.playerKart.lap > this.totalLaps && !this.playerKart.finished) {
+      if (this.selectedMode === 'race' && this.playerKart.lap > this.totalLaps && !this.playerKart.finished) {
         this.playerKart.finished = true;
         this.state = 'FINISHED';
         const sorted = [...this.karts].sort((a, b) => b.totalProgress - a.totalProgress);
         const place = sorted.indexOf(this.playerKart) + 1;
-        banner.textContent = place === 1 ? '🏆 ПОБЕДА! 1 МЕСТО!' : `ФИНИШ // ${place} МЕСТО`;
+        const lvlCfg = DIFFICULTY_LEVELS[this.selectedLevelIdx];
+        const basePrize = place === 1 ? 450 : (place === 2 ? 280 : 160);
+        const prize = Math.round(basePrize * lvlCfg.rewardMult);
+        this.profile.addReward(prize, 160, place === 1);
+
+        banner.innerHTML = `${place === 1 ? '🏆 ПОБЕДА! 1 МЕСТО!' : `ФИНИШ // ${place} МЕСТО ИЗ ${this.karts.length}`}<br/><span style="font-size:26px;color:#00ff66;">НАГРАДА: +${prize} CR & +160 XP</span>`;
         this.sound.playPickup();
         setTimeout(() => {
-          banner.textContent = '';
+          banner.innerHTML = '';
           this.togglePauseMenu();
         }, 3600);
       }
@@ -1682,7 +2945,6 @@ class GameEngine {
       this.updateHUD();
     }
 
-    this.particles.update(dt);
     this.updateCamera(dt);
     this.renderer.render(this.scene, this.camera);
     requestAnimationFrame((t) => this.loop(t));
@@ -1690,54 +2952,183 @@ class GameEngine {
 }
 
 // ============================================================================
-// ИНИЦИАЛИЗАЦИЯ ПЕРЕКЛЮЧАТЕЛЕЙ МЕНЮ
+// ОБРАБОТЧИКИ КЛИКОВ ДЛЯ ВСЕХ КНОПОК, ТЮНИНГА И КОЛЕСА ФОРТУНЫ
 // ============================================================================
 window.addEventListener('DOMContentLoaded', () => {
   const game = new GameEngine();
 
-  const bindSelector = (id, attr, cb) => {
-    const el = document.getElementById(id);
-    el.querySelectorAll('.opt-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        el.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        cb(Number(btn.getAttribute(attr)));
-      });
-    });
+  const buyUpgrade = (statKey) => {
+    const d = game.profile.data;
+    const upg = game.profile.getUpgradesForCar(d.selectedCarId);
+    if (upg[statKey] >= 5) return;
+    if (d.credits >= 250) {
+      d.credits -= 250;
+      upg[statKey]++;
+      game.profile.save();
+      game.initSceneObjects();
+      game.refreshAllMenuUI();
+      game.sound.playBoost();
+    } else {
+      document.getElementById('tuning-summary-text').innerHTML =
+        `<span style="color:#ff3366;">Недостаточно кредитов! Нужно 250 CR (Откройте Профиль ➔ "+2000 CR" или Рулетку!)</span>`;
+    }
   };
 
-  bindSelector('level-selector', 'data-lvl', (val) => {
-    game.selectedLevelIdx = val;
-  });
+  document.addEventListener('click', (e) => {
+    const target = e.target;
 
-  bindSelector('track-selector', 'data-track', (val) => {
-    game.selectedTrackIdx = val;
-    document.getElementById('menu-tv-status').textContent = CITY_THEMES[val].name;
-    game.initSceneObjects();
-  });
+    const tabBtn = target.closest('.tab-btn');
+    if (tabBtn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      tabBtn.classList.add('active');
+      const tabEl = document.getElementById(tabBtn.getAttribute('data-tab'));
+      if (tabEl) tabEl.classList.add('active');
+      game.refreshAllMenuUI();
+      return;
+    }
 
-  bindSelector('car-selector', 'data-car', (val) => {
-    game.selectedCarIdx = val;
-    game.initSceneObjects();
-  });
+    const optBtn = target.closest('.opt-btn');
+    if (optBtn) {
+      if (optBtn.hasAttribute('data-mode')) {
+        document.querySelectorAll('[data-mode]').forEach(b => b.classList.remove('active'));
+        optBtn.classList.add('active');
+        game.selectedMode = optBtn.getAttribute('data-mode');
+        game.initSceneObjects();
+      } else if (optBtn.hasAttribute('data-weather')) {
+        document.querySelectorAll('[data-weather]').forEach(b => b.classList.remove('active'));
+        optBtn.classList.add('active');
+        const w = optBtn.getAttribute('data-weather');
+        game.fx.weatherPoints.visible = (w === 'storm');
+      } else if (optBtn.hasAttribute('data-lvl')) {
+        optBtn.parentElement.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('active'));
+        optBtn.classList.add('active');
+        game.selectedLevelIdx = Number(optBtn.getAttribute('data-lvl'));
+        game.initSceneObjects();
+      } else if (optBtn.hasAttribute('data-track')) {
+        optBtn.parentElement.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('active'));
+        optBtn.classList.add('active');
+        game.selectedTrackIdx = Number(optBtn.getAttribute('data-track'));
+        game.initSceneObjects();
+      }
+      return;
+    }
 
-  document.getElementById('btn-start-race').addEventListener('click', () => game.startRace());
-  document.getElementById('btn-export-assets').addEventListener('click', () => game.assets.exportAllToDisk());
+    // Тюнинг выбранного болида
+    if (target.closest('#btn-upg-engine')) { buyUpgrade('engine'); return; }
+    if (target.closest('#btn-upg-turbo'))  { buyUpgrade('turbo');  return; }
+    if (target.closest('#btn-upg-tires'))  { buyUpgrade('tires');  return; }
 
-  let crtOn = true;
-  const crtBtn = document.getElementById('btn-toggle-crt');
-  crtBtn.addEventListener('click', () => {
-    crtOn = !crtOn;
-    document.getElementById('crt-overlay').style.display = crtOn ? 'block' : 'none';
-    crtBtn.textContent = `📺 Эффект ЭЛТ-Телевизора: ${crtOn ? 'ВКЛ' : 'ВЫКЛ'}`;
-  });
+    // Выбор цвета неона
+    const swatch = target.closest('.neon-swatch');
+    if (swatch) {
+      document.querySelectorAll('.neon-swatch').forEach(s => s.classList.remove('active'));
+      swatch.classList.add('active');
+      game.profile.data.customNeon = Number(swatch.getAttribute('data-neon'));
+      game.profile.save();
+      game.initSceneObjects();
+      return;
+    }
 
-  let touchOn = false;
-  const touchBtn = document.getElementById('btn-toggle-touch');
-  touchBtn.addEventListener('click', () => {
-    touchOn = !touchOn;
-    document.getElementById('touch-controls').style.display = touchOn ? 'flex' : 'none';
-    touchBtn.textContent = `📱 Сенсорные кнопки: ${touchOn ? 'ВКЛ' : 'ВЫКЛ'}`;
+    // Покупка или выбор машины
+    const carCard = target.closest('.car-card');
+    if (carCard) {
+      const carId = Number(carCard.getAttribute('data-car-id'));
+      const car = CAR_CATALOG[carId];
+      const d = game.profile.data;
+      if (d.unlockedCars.includes(carId)) {
+        d.selectedCarId = carId;
+        game.profile.save();
+        game.initSceneObjects();
+        game.refreshAllMenuUI();
+      } else if (d.credits >= car.price) {
+        d.credits -= car.price;
+        d.unlockedCars.push(carId);
+        d.selectedCarId = carId;
+        game.profile.save();
+        game.initSceneObjects();
+        game.refreshAllMenuUI();
+      } else {
+        document.getElementById('tuning-summary-text').innerHTML =
+          `<span style="color:#ff3366;">Не хватает CR для покупки ${car.name}! Нужно ${car.price} CR.</span>`;
+      }
+      return;
+    }
+
+    const avatarItem = target.closest('.avatar-item');
+    if (avatarItem) {
+      game.profile.data.avatarId = Number(avatarItem.getAttribute('data-avatar-id'));
+      game.profile.save();
+      game.refreshAllMenuUI();
+      return;
+    }
+
+    // Колесо Фортуны в профиле
+    if (target.closest('#btn-spin-wheel')) {
+      const prizes = [
+        { text: '🎉 ДЖЕКПОТ РУЛЕТКИ: +1200 CR!', cr: 1200, xp: 50 },
+        { text: '⚡ ПРИЗ РУЛЕТКИ: +500 CR и +120 XP!', cr: 500, xp: 120 },
+        { text: '🔥 МЕГА-БОНУС: +850 CR!', cr: 850, xp: 80 }
+      ];
+      const p = prizes[Math.floor(Math.random() * prizes.length)];
+      game.profile.data.credits += p.cr;
+      game.profile.data.xp += p.xp;
+      game.profile.save();
+      game.refreshAllMenuUI();
+      document.getElementById('wheel-result-msg').textContent = p.text;
+      return;
+    }
+
+    if (target.closest('#btn-start-race')) { game.startSession(); return; }
+    if (target.closest('#btn-open-menu-hud')) { game.togglePauseMenu(); return; }
+    if (target.closest('#btn-cam-view')) { game.cycleCameraView(); return; }
+
+    if (target.closest('#btn-save-name')) {
+      const val = document.getElementById('pilot-name-input').value.trim();
+      if (val.length > 0) {
+        game.profile.data.pilotName = val.toUpperCase();
+        game.profile.save();
+        game.refreshAllMenuUI();
+      }
+      return;
+    }
+
+    if (target.closest('#btn-gift-credits')) {
+      game.profile.data.credits += 2000;
+      game.profile.save();
+      game.refreshAllMenuUI();
+      return;
+    }
+
+    if (target.closest('#btn-reset-save')) {
+      game.profile.resetToDefault();
+      game.initSceneObjects();
+      game.refreshAllMenuUI();
+      return;
+    }
+
+    const crtBtn = target.closest('#btn-toggle-crt');
+    if (crtBtn) {
+      const overlay = document.getElementById('crt-overlay');
+      const isHidden = window.getComputedStyle(overlay).display === 'none';
+      overlay.style.display = isHidden ? 'block' : 'none';
+      crtBtn.textContent = `📺 ЭЛТ-Фильтр: ${isHidden ? 'ВКЛ' : 'ВЫКЛ'}`;
+      return;
+    }
+
+    const touchBtn = target.closest('#btn-toggle-touch');
+    if (touchBtn) {
+      const tc = document.getElementById('touch-controls');
+      const isHidden = window.getComputedStyle(tc).display === 'none';
+      tc.style.display = isHidden ? 'flex' : 'none';
+      touchBtn.textContent = `📱 Сенсор: ${isHidden ? 'ВКЛ' : 'ВЫКЛ'}`;
+      return;
+    }
+
+    if (target.closest('#btn-export-assets')) {
+      game.assets.exportAllToDisk();
+      return;
+    }
   });
 });
 </script>
